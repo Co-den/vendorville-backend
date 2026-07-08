@@ -1,0 +1,71 @@
+{
+  "name": "devops-api",
+  "version": "1.0.0",
+  "description": "Full DevOps-API project",
+  "homepage": "https://github.com/Co-den/DevOps-API#readme",
+  "bugs": {
+    "url": "https://github.com/Co-den/DevOps-API/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Co-den/DevOps-API.git"
+  },
+  "license": "ISC",
+  "author": "agugbue ikenna",
+  "type": "module",
+  "main": "src/index.js",
+  "imports": {
+    "#src/*": "./src/*",
+    "#config/*": "./src/config/*",
+    "#controllers/*": "./src/controllers/*",
+    "#middlewares/*": "./src/middlewares/*",
+    "#models/*": "./src/models/*",
+    "#routes/*": "./src/routes/*",
+    "#services/*": "./src/services/*",
+    "#validations/*": "./src/validations/*",
+    "#utils/*": "./src/utils/*"
+  },
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
+    "test": "cross-env NODE_ENV=test NODE_OPTIONS=--experimental-vm-modules jest",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:generate": "drizzle-kit generate --config=drizzle.config.js",
+    "db:migrate": "drizzle-kit migrate --config=drizzle.config.js",
+    "db:studio": "drizzle-kit studio --config=drizzle.config.js",
+    "dev:docker": "sh ./scripts/dev.sh",
+    "prod:docker": "sh ./scripts/prod.sh",
+    "k8s:kubernetes": "sh ./scripts/k8s.sh"
+  },
+  "dependencies": {
+    "@arcjet/inspect": "^1.4.0",
+    "@arcjet/node": "^1.4.0",
+    "@neondatabase/serverless": "^1.1.0",
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "cross-env": "^10.1.0",
+    "dotenv": "^17.4.1",
+    "drizzle-orm": "^0.45.2",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "morgan": "^1.10.1",
+    "nodemon": "^3.1.14",
+    "winston": "^3.19.0",
+    "zod": "^4.4.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "drizzle-kit": "^0.31.10",
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "jest": "^30.4.2",
+    "prettier": "^3.8.3",
+    "supertest": "^7.2.2"
+  }
+}
