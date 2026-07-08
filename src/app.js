@@ -12,13 +12,22 @@ const app = express();
 
 app.use(helmet());
 app.use(express.json());
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://vendorville.vercel.app",
+];
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-       "https://vendorville.vercel.app/",
-       "https://vendorville-backend.onrender.com/api/auth/signup",
-      ],
+    origin(origin, callback) {
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
+        return callback(null, true);
+      }
+
+      callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   }),
 );
