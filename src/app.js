@@ -17,7 +17,7 @@ app.use(
     origin: [
       "http://localhost:3000",
        "https://vendorville.vercel.app/",
-       "https://vendorville-backend.onrender.com/api/auth",
+       "https://vendorville-backend.onrender.com/api/auth/signup",
       ],
     credentials: true,
   }),
