@@ -16,7 +16,7 @@ export const generateVerificationCode = () => {
 
 export const sendVerificationEmail = async (email, firstName, code) => {
   try {
-    const logoPath = path.join(__dirname, "../assets/vv.png");
+    const logoPath = path.join(__dirname, "assets/vv.png");
     const logoContent = fs.readFileSync(logoPath).toString("base64");
 
     const { data, error } = await resend.emails.send({
