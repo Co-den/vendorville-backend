@@ -18,6 +18,7 @@ export const hashpassword = async (password) => {
   }
 };
 
+
 // Create a new user in the database
 export const createUser = async ({
   firstName,
@@ -86,26 +87,25 @@ export const createUser = async ({
         businessAddress: users.businessAddress,
         postalCode: users.postalCode,
         role: users.role,
-        isVerified: users.isVerified, 
+        isVerified: users.isVerified,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
       });
-    let emailSent = true;
-    try {
-      await sendVerificationEmail(
-        newUser.email,
-        newUser.firstName,
-        verificationCode,
-      );
-    } catch (emailError) {
-      emailSent = false;
-      logger.error(
-        `Signup succeeded but verification email failed for ${newUser.email}`,
-        emailError,
-      );
-    }
+
+    // Fire-and-forget don't block the signup response on email sending
+    sendVerificationEmail(newUser.email, newUser.firstName, verificationCode)
+      .then(() => {
+        logger.info(`Verification email sent to ${newUser.email}`);
+      })
+      .catch((emailError) => {
+        logger.error(
+          `Signup succeeded but verification email failed for ${newUser.email}`,
+          emailError
+        );
+      });
+
     logger.info(`User ${newUser.email} created successfully`);
-    return { ...newUser, emailSent };
+    return newUser;
   } catch (error) {
     logger.error(`Error creating the user:${error}`);
     throw new Error("Error creating the user");
