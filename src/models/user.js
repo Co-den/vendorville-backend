@@ -1,4 +1,10 @@
-import { pgTable, serial, timestamp, varchar } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  pgTable,
+  serial,
+  timestamp,
+  varchar,
+} from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -17,7 +23,7 @@ export const users = pgTable("users", {
     length: 255,
   }).notNull(),
 
-   businessType: varchar("business_type", {
+  businessType: varchar("business_type", {
     length: 100,
   }).notNull(),
 
@@ -52,6 +58,12 @@ export const users = pgTable("users", {
   role: varchar("role", {
     length: 50,
   }).notNull(),
+
+  isVerified: boolean("is_verified").default(false).notNull(),
+
+  verificationCode: varchar("verification_code", { length: 10 }),
+
+  verificationCodeExpiresAt: timestamp("verification_code_expires_at"),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
 

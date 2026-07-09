@@ -1,5 +1,5 @@
 {
-  "id": "6fe55822-4538-4172-b467-39251d3267a4",
+  "id": "10e484f1-a225-4f42-b6a5-8376a70c46b4",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -102,8 +102,26 @@
           "name": "role",
           "type": "varchar(50)",
           "primaryKey": false,
+          "notNull": true
+        },
+        "is_verified": {
+          "name": "is_verified",
+          "type": "boolean",
+          "primaryKey": false,
           "notNull": true,
-          "default": "'vendor'"
+          "default": false
+        },
+        "verification_code": {
+          "name": "verification_code",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "verification_code_expires_at": {
+          "name": "verification_code_expires_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",

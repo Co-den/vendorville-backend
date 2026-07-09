@@ -1,1 +1,0 @@
-ALTER TABLE "users" ALTER COLUMN "business_type" SET DATA TYPE varchar(100);

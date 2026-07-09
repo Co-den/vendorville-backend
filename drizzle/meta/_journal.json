@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1783447444404,
-      "tag": "0000_early_boom_boom",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1783540074263,
-      "tag": "0001_familiar_azazel",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1783589608076,
-      "tag": "0002_careless_black_crow",
+      "when": 1783595441896,
+      "tag": "0000_salty_shriek",
       "breakpoints": true
     }
   ]

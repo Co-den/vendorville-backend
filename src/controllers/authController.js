@@ -87,6 +87,14 @@ export const signup = async (req, res, next) => {
   }
 };
 
+export const verifyEmail = async()=>{
+  try{
+      
+  }catch{
+
+  }
+}
+
 export const login = async (req, res, next) => {
   try {
     const validationResult = signinSchema.safeParse(req.body);

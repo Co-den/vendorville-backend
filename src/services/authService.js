@@ -1,6 +1,10 @@
 import { db } from "#config/database.js";
 import logger from "#config/logger.js";
 import { users } from "#models/user.js";
+import {
+  generateVerificationCode,
+  sendVerificationEmail,
+} from "#utils/verification.js";
 import bcrypt from "bcrypt";
 import { eq } from "drizzle-orm";
 
@@ -43,6 +47,9 @@ export const createUser = async ({
 
     const password_hashed = await hashpassword(password);
     const hashedPin = await hashpassword(pin);
+    const verificationCode = generateVerificationCode();
+    const verificationCodeExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
     const [newUser] = await db
       .insert(users)
       .values({
@@ -78,21 +85,131 @@ export const createUser = async ({
         postalCode: users.postalCode,
         role: users.role,
         createdAt: users.createdAt,
-        updatedAt: users.updatedAt
+        updatedAt: users.updatedAt,
       });
-
+    let emailSent = true;
+    try {
+      await sendVerificationEmail(
+        newUser.email,
+        newUser.firstName,
+        verificationCode,
+      );
+    } catch (emailError) {
+      emailSent = false;
+      logger.error(
+        `Signup succeeded but verification email failed for ${newUser.email}`,
+        emailError,
+      );
+    }
     logger.info(`User ${newUser.email} created successfully`);
     return newUser;
-  }
-    /*catch (error) {
+  } catch (error) {
     logger.error(`Error creating the user:${error}`);
     throw new Error("Error creating the user");
-  }*/
-   catch (error) {
-  console.error(error);
-  throw error;
-}
-  };
+  }
+};
+
+// Verify the code sent to user's email and mark account as verified
+export const verifyEmailCode = async (email, code) => {
+  try {
+    const userResult = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+
+    if (userResult.length === 0) {
+      throw new Error("Invalid email or verification code");
+    }
+
+    const user = userResult[0];
+
+    if (user.isVerified) {
+      throw new Error("Email is already verified");
+    }
+
+    if (user.verificationCode !== code) {
+      throw new Error("Invalid email or verification code");
+    }
+
+    if (
+      user.verificationCodeExpiresAt &&
+      new Date() > new Date(user.verificationCodeExpiresAt)
+    ) {
+      throw new Error("Verification code has expired");
+    }
+
+    const [updatedUser] = await db
+      .update(users)
+      .set({
+        isVerified: true,
+        verificationCode: null,
+        verificationCodeExpiresAt: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.email, email))
+      .returning({
+        id: users.id,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        email: users.email,
+        role: users.role,
+        isVerified: users.isVerified,
+        updatedAt: users.updatedAt,
+      });
+
+    logger.info(`User ${updatedUser.email} verified successfully`);
+    return updatedUser;
+  } catch (error) {
+    logger.warn(`Email verification failed for ${email}`, {
+      error: error.message,
+    });
+    throw error;
+  }
+};
+
+// Resend a new verification code to the user
+export const resendVerificationCode = async (email) => {
+  try {
+    const userResult = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+
+    if (userResult.length === 0) {
+      throw new Error("User not found");
+    }
+
+    const user = userResult[0];
+
+    if (user.isVerified) {
+      throw new Error("Email is already verified");
+    }
+
+    const verificationCode = generateVerificationCode();
+    const verificationCodeExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+    await db
+      .update(users)
+      .set({
+        verificationCode,
+        verificationCodeExpiresAt,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.email, email));
+
+    await sendVerificationEmail(user.email, user.firstName, verificationCode);
+
+    logger.info(`Verification code resent to ${user.email}`);
+    return { message: "Verification code resent" };
+  } catch (error) {
+    logger.warn(`Resend verification failed for ${email}`, {
+      error: error.message,
+    });
+    throw error;
+  }
+};
 
 // Verify user credentials and return user data
 export const verifyCredentials = async (email, password, pin) => {

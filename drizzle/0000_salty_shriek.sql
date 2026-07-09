@@ -14,7 +14,10 @@ CREATE TABLE "users" (
 	"business_address" varchar(255) NOT NULL,
 	"postal_code" varchar(20),
 	"pin" varchar(255) NOT NULL,
-	"role" varchar(50) DEFAULT 'vendor' NOT NULL,
+	"role" varchar(50) NOT NULL,
+	"is_verified" boolean DEFAULT false NOT NULL,
+	"verification_code" varchar(10),
+	"verification_code_expires_at" timestamp,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "users_email_unique" UNIQUE("email")
