@@ -1,13 +1,27 @@
 import logger from "#config/logger.js";
+import dns from "dns";
 import fs from "fs";
+import nodemailer from "nodemailer";
 import path from "path";
-import { Resend } from "resend";
 import { fileURLToPath } from "url";
+
+dns.setDefaultResultOrder("ipv4first");
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Reusable transporter
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+  family: 4,
+  connectionTimeout: 10000,
+});
 
 // Generate a 6-digit numeric verification code
 export const generateVerificationCode = () => {
@@ -19,8 +33,8 @@ export const sendVerificationEmail = async (email, firstName, code) => {
     const logoPath = path.join(__dirname, "assets/vv.png");
     const logoContent = fs.readFileSync(logoPath).toString("base64");
 
-    const { data, error } = await resend.emails.send({
-      from: "VendorVille <onboarding@resend.dev>",
+    await transporter.sendMail({
+      from: `"VendorVille" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Verify your VendorVille account",
       html: `
@@ -40,18 +54,15 @@ export const sendVerificationEmail = async (email, firstName, code) => {
         {
           filename: "vv.png",
           content: logoContent,
+          encoding: "base64",
           cid: "vv-logo",
         },
       ],
     });
 
-    if (error) {
-      throw new Error(error.message || "Resend API returned an error");
-    }
-
-    logger.info(`Verification email sent to ${email}`, { id: data?.id });
+    logger.info(`Verification email sent to ${email}`);
   } catch (error) {
-    logger.error(`Error sending verification email to ${email}`, error);
-    throw new Error("Error sending verification email");
+    logger.error(error);
+    throw error;
   }
 };
