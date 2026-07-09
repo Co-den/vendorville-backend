@@ -75,7 +75,7 @@ export const signup = async (req, res, next) => {
         state: user.state,
         city: user.city,
         businessAddress: user.businessAddress,
-        postalCode: user.postalCode
+        postalCode: user.postalCode,
       },
     });
   } catch (error) {
@@ -87,13 +87,84 @@ export const signup = async (req, res, next) => {
   }
 };
 
-export const verifyEmail = async()=>{
-  try{
-      
-  }catch{
+export const verifyEmail = async (req, res, next) => {
+  try {
+    const { email, code } = req.body;
 
+    if (!email || !code) {
+      return res.status(400).json({
+        message: "Email and verification code are required",
+      });
+    }
+
+    const user = await verifyEmailCode(email, code);
+
+    const token = jwtSign.sign({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
+    cookies.setCookie(res, "token", token);
+    logger.info(`User ${email} verified successfully`);
+
+    res.status(200).json({
+      message: "Email verified successfully",
+      user: {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        isVerified: user.isVerified,
+      },
+    });
+  } catch (error) {
+    logger.warn("Email verification error", {
+      email: req.body.email,
+      error: error.message,
+    });
+
+    if (
+      error.message === "Invalid email or verification code" ||
+      error.message === "Verification code has expired" ||
+      error.message === "Email is already verified"
+    ) {
+      return res.status(400).json({ message: error.message });
+    }
+
+    next(error);
   }
-}
+};
+
+export const resendCode = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const result = await resendVerificationCode(email);
+
+    logger.info(`Verification code resent to ${email}`);
+    res.status(200).json({ message: result.message });
+  } catch (error) {
+    logger.warn("Resend code error", {
+      email: req.body.email,
+      error: error.message,
+    });
+
+    if (
+      error.message === "User not found" ||
+      error.message === "Email is already verified"
+    ) {
+      return res.status(400).json({ message: error.message });
+    }
+
+    next(error);
+  }
+};
 
 export const login = async (req, res, next) => {
   try {
