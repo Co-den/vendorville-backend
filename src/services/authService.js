@@ -68,6 +68,8 @@ export const createUser = async ({
         postalCode,
         pin: hashedPin,
         role,
+        verificationCode,
+        verificationCodeExpiresAt,
       })
       .returning({
         id: users.id,
@@ -84,6 +86,7 @@ export const createUser = async ({
         businessAddress: users.businessAddress,
         postalCode: users.postalCode,
         role: users.role,
+        isVerified: users.isVerified, 
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
       });
@@ -102,7 +105,7 @@ export const createUser = async ({
       );
     }
     logger.info(`User ${newUser.email} created successfully`);
-    return newUser;
+    return { ...newUser, emailSent };
   } catch (error) {
     logger.error(`Error creating the user:${error}`);
     throw new Error("Error creating the user");
