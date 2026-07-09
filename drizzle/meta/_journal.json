@@ -15,6 +15,13 @@
       "when": 1783540074263,
       "tag": "0001_familiar_azazel",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1783589608076,
+      "tag": "0002_careless_black_crow",
+      "breakpoints": true
     }
   ]
 }
