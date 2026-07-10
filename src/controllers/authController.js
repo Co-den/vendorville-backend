@@ -230,3 +230,23 @@ export const logout = async (req, res, next) => {
     next(error);
   }
 };
+
+// authController.js
+export const checkAuth = async (req, res, next) => {
+  try {
+    // assuming you have auth middleware that decodes the JWT and attaches req.user
+    if (!req.user) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    res.status(200).json({
+      user: {
+        id: req.user.id,
+        email: req.user.email,
+        role: req.user.role,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
