@@ -18,7 +18,6 @@ export const hashpassword = async (password) => {
   }
 };
 
-
 // Create a new user in the database
 export const createUser = async ({
   firstName,
@@ -100,7 +99,7 @@ export const createUser = async ({
       .catch((emailError) => {
         logger.error(
           `Signup succeeded but verification email failed for ${newUser.email}`,
-          emailError
+          emailError,
         );
       });
 
@@ -240,6 +239,7 @@ export const verifyCredentials = async (email, password, pin) => {
       id: user.id,
       email: user.email,
       role: user.role,
+      firstName: user.firstName,
     };
   } catch (error) {
     logger.warn(`Authentication failed for email: ${email}`, {

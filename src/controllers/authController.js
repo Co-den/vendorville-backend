@@ -190,6 +190,7 @@ export const login = async (req, res, next) => {
       id: user.id,
       email: user.email,
       role: user.role,
+      firstName: user.firstName,
     });
 
     cookies.setCookie(res, "token", token);
@@ -201,6 +202,7 @@ export const login = async (req, res, next) => {
         id: user.id,
         email: user.email,
         role: user.role,
+        firstName: user.firstName,
       },
     });
   } catch (error) {
@@ -244,6 +246,7 @@ export const checkAuth = async (req, res, next) => {
         id: req.user.id,
         email: req.user.email,
         role: req.user.role,
+        firstName: user.firstName,
       },
     });
   } catch (error) {
