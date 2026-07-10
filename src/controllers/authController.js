@@ -1,5 +1,10 @@
 import logger from "#config/logger.js";
-import { createUser, verifyCredentials } from "#services/authService.js";
+import {
+  createUser,
+  resendVerificationCode,
+  verifyCredentials,
+  verifyEmailCode,
+} from "#services/authService.js";
 import { cookies } from "#utils/cookies.js";
 import formatValidationError from "#utils/format.js";
 import { jwtSign } from "#utils/jwt.js";
