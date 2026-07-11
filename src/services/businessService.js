@@ -2,9 +2,8 @@ import { db } from "#config/database.js";
 import logger from "#config/logger.js";
 import { businesses, businessImages } from "#models/business.js";
 import { subscriptions } from "#models/subscription.js";
-import { uploadBufferToCloudinary } from "#utils/uploadToCloudinary.js";
-// #services/businessService.js — replace the top of createBusiness with:
 import { getSubscription } from "#services/subscriptionService.js";
+import { uploadBufferToCloudinary } from "#utils/uploadToCloudinary.js";
 
 import { eq } from "drizzle-orm";
 
@@ -57,14 +56,6 @@ export const createBusiness = async (userId, data, files) => {
     .limit(1);
   const plan = subResult[0]?.plan || "starter";
   const limit = planLimits[plan] ?? 1;
-
-  const existing = await db
-    .select()
-    .from(businesses)
-    .where(eq(businesses.userId, userId));
-  if (existing.length >= limit) {
-    throw new Error("BUSINESS_LIMIT_REACHED");
-  }
 
   let logoUrl = null;
   if (files?.logo?.[0]) {

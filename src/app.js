@@ -12,6 +12,7 @@ import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
 
+const app = express();
 app.use(
   "/api/webhooks",
   express.raw({ type: "application/json" }),
@@ -24,8 +25,6 @@ app.use(
 );
 // then later, your normal:
 app.use(express.json());
-
-const app = express();
 
 app.use(helmet());
 app.use(express.json());
