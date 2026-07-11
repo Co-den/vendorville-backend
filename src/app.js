@@ -1,12 +1,29 @@
 import logger from "#config/logger.js";
 import securityMiddleware from "#middlewares/security.js";
 import authRoutes from "#routes/authRoutes.js";
+import businessRoutes from "#routes/businessRoutes.js";
+import productRoutes from "#routes/productRoutes.js";
 import userRoutes from "#routes/userRoutes.js";
+import walletRoutes from "#routes/walletRoutes.js";
+import webhookRoutes from "#routes/webhookRoutes.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
+
+app.use(
+  "/api/webhooks",
+  express.raw({ type: "application/json" }),
+  (req, res, next) => {
+    req.rawBody = req.body;
+    req.body = JSON.parse(req.body.toString());
+    next();
+  },
+  webhookRoutes,
+);
+// then later, your normal:
+app.use(express.json());
 
 const app = express();
 
@@ -61,6 +78,9 @@ app.get("/api", (req, res) => {
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/wallet", walletRoutes);
+app.use("/api/businesses", businessRoutes);
+app.use("/api/businesses/:businessId/products", productRoutes);
 
 app.use("/nonexsistent", (req, res) => {
   res.status(404).json({ error: "Route not found" });

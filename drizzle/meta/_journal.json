@@ -8,6 +8,27 @@
       "when": 1783654519139,
       "tag": "0000_natural_jack_murdock",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1783779714217,
+      "tag": "0001_outstanding_starhawk",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1783783435449,
+      "tag": "0002_flimsy_the_call",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1783784422539,
+      "tag": "0003_simple_vermin",
+      "breakpoints": true
     }
   ]
 }
