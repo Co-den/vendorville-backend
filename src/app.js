@@ -18,9 +18,13 @@ app.use(
   "/api/webhooks",
   express.raw({ type: "application/json" }),
   (req, res, next) => {
-    req.rawBody = req.body;
-    req.body = JSON.parse(req.body.toString());
-    next();
+    try {
+      req.rawBody = req.body;
+      req.body = JSON.parse(req.body.toString());
+      next();
+    } catch (err) {
+      return res.status(400).json({ message: "Invalid JSON payload" });
+    }
   },
   webhookRoutes,
 );
