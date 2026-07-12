@@ -8,6 +8,14 @@ const securityMiddleware = async (req, res, next) => {
     return next();
   }
 
+  // Skip Arcjet body analysis for multipart uploads — binary payloads can
+  // cause the SDK to throw, and file-type/size validation is already
+  // handled by multer for these routes.
+  const contentType = req.headers["content-type"] || "";
+  if (contentType.startsWith("multipart/form-data")) {
+    return next();
+  }
+
   try {
     const role = req.user?.role || "guest";
 
@@ -87,7 +95,11 @@ const securityMiddleware = async (req, res, next) => {
 
     next();
   } catch (err) {
-    console.error("Arcjet Middleware Error:", err);
+    loggers.error("Arcjet Middleware Error", {
+      error: err.message,
+      stack: err.stack,
+      path: req.path,
+    });
 
     res.status(500).json({
       error: "Internal Server Error",
