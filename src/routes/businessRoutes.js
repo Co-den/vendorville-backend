@@ -6,10 +6,10 @@ import express from "express";
 const router = express.Router();
 router.use(authMiddleware);
 
-router.get("/businesses", businessController.getBusinesses);
+router.get("/", businessController.getBusinesses);
 
 router.post(
-  "/create-business",
+  "/",
   upload.fields([
     { name: "logo", maxCount: 1 },
     { name: "premisesImages", maxCount: 5 },
@@ -17,6 +17,6 @@ router.post(
   businessController.createBusiness,
 );
 
-router.delete("/businesses/:id", businessController.deleteBusiness);
+router.delete("/:id", businessController.deleteBusiness);
 
 export default router;
