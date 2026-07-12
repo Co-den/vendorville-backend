@@ -5,7 +5,10 @@ import express from "express";
 const router = express.Router();
 router.use(authMiddleware);
 
-router.get("/", subscriptionController.getSubscription);
-router.post("/upgrade", subscriptionController.upgradeSubscription);
+router.get("/subscription", subscriptionController.getSubscription);
+router.post(
+  "/subscription/upgrade",
+  subscriptionController.upgradeSubscription,
+);
 
 export default router;
