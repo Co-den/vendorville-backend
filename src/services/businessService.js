@@ -1,17 +1,9 @@
 import { db } from "#config/database.js";
 import logger from "#config/logger.js";
 import { businesses, businessImages } from "#models/business.js";
-import { subscriptions } from "#models/subscription.js";
 import { getSubscription } from "#services/subscriptionService.js";
 import { uploadBufferToCloudinary } from "#utils/uploadToCloudinary.js";
-
 import { eq } from "drizzle-orm";
-
-const planLimits = {
-  starter: 1,
-  professional: 2,
-  enterprise: Infinity,
-};
 
 export const getUserBusinesses = async (userId) => {
   const list = await db
@@ -35,6 +27,10 @@ export const getUserBusinesses = async (userId) => {
 export const createBusiness = async (userId, data, files) => {
   const sub = await getSubscription(userId);
 
+  if (sub.status !== "active") {
+    throw new Error("SUBSCRIPTION_INACTIVE");
+  }
+
   const existing = await db
     .select()
     .from(businesses)
@@ -42,20 +38,6 @@ export const createBusiness = async (userId, data, files) => {
   if (existing.length >= sub.limit) {
     throw new Error("BUSINESS_LIMIT_REACHED");
   }
-  if (sub.status !== "active") {
-    throw new Error("SUBSCRIPTION_INACTIVE");
-  }
-  if (existing.length >= sub.limit) {
-    throw new Error("BUSINESS_LIMIT_REACHED");
-  }
-  // Enforce plan limit server-side — never trust the frontend's own check
-  const subResult = await db
-    .select()
-    .from(subscriptions)
-    .where(eq(subscriptions.userId, userId))
-    .limit(1);
-  const plan = subResult[0]?.plan || "starter";
-  const limit = planLimits[plan] ?? 1;
 
   let logoUrl = null;
   if (files?.logo?.[0]) {
