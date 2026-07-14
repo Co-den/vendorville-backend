@@ -2,8 +2,10 @@ import logger from "#config/logger.js";
 import securityMiddleware from "#middlewares/security.js";
 import authRoutes from "#routes/authRoutes.js";
 import businessRoutes from "#routes/businessRoutes.js";
+import customerRoutes from "#routes/customerRoutes.js";
 import orderRoutes from "#routes/orderRoutes.js";
 import productRoutes from "#routes/productRoutes.js";
+import subscriptionRoutes from "#routes/subscriptionRoutes.js";
 import userRoutes from "#routes/userRoutes.js";
 import walletRoutes from "#routes/walletRoutes.js";
 import webhookRoutes from "#routes/webhookRoutes.js";
@@ -86,6 +88,8 @@ app.use("/api/wallet", walletRoutes);
 app.use("/api/businesses", businessRoutes);
 app.use("/api/businesses/:businessId/products", productRoutes);
 app.use("/api/businesses/:businessId/orders", orderRoutes);
+app.use("/api/businesses/:businessId/customers", customerRoutes);
+app.use("/api/subscriptions", subscriptionRoutes);
 
 app.use("/nonexsistent", (req, res) => {
   res.status(404).json({ error: "Route not found" });
