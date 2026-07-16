@@ -19,11 +19,6 @@ export const createBusiness = async (req, res, next) => {
     );
     res.status(201).json({ business });
   } catch (error) {
-    console.error("========== CREATE BUSINESS ERROR ==========");
-    console.error(error);
-    console.error("Message:", error.message);
-    console.error("Stack:", error.stack);
-
     if (error.message === "BUSINESS_LIMIT_REACHED") {
       return res.status(403).json({
         message:
@@ -41,6 +36,7 @@ export const createBusiness = async (req, res, next) => {
     res.status(500).json({ message: "Failed to create business" });
   }
 };
+
 export const deleteBusiness = async (req, res, next) => {
   try {
     await businessService.deleteBusiness(req.user.id, req.params.id);
