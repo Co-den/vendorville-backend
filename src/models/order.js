@@ -1,4 +1,5 @@
 import { businesses } from "#models/business.js";
+import { customerAccounts } from "#models/customerAccount.js";
 import {
   integer,
   pgTable,
@@ -22,11 +23,18 @@ export const orders = pgTable("orders", {
   totalAmount: integer("total_amount").notNull(), // kobo
   paymentMethod: varchar("payment_method", { length: 20 })
     .notNull()
-    .default("cash"), // cash | card | transfer | wallet
-  status: varchar("status", { length: 20 }).notNull().default("pending"), // pending | paid | fulfilled | cancelled
+    .default("cash"),
+  status: varchar("status", { length: 20 }).notNull().default("pending"),
 
   notes: text("notes"),
 
+  deliveryAddress: text("delivery_address"),
+  deliveryFee: integer("delivery_fee").notNull().default(0),
+  source: varchar("source", { length: 20 }).notNull().default("pos"),
+  paystackReference: varchar("paystack_reference", { length: 100 }),
+  customerAccountId: integer("customer_account_id").references(
+    () => customerAccounts.id,
+  ),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

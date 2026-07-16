@@ -46,7 +46,16 @@ export const createBusiness = async (userId, data, files) => {
       "vendorhub/logos",
     );
   }
+  const generateSlug = (name) => {
+    const base = name
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+    return `${base}-${Math.random().toString(36).slice(2, 6)}`;
+  };
 
+  const slug = generateSlug(data.name);
   const [newBusiness] = await db
     .insert(businesses)
     .values({
@@ -65,6 +74,7 @@ export const createBusiness = async (userId, data, files) => {
       visibility: data.visibility || "public",
       address: data.address,
       description: data.description || null,
+      slug,
     })
     .returning();
 

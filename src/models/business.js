@@ -34,7 +34,7 @@ export const businesses = pgTable("businesses", {
   description: text("description"),
 
   isVerified: boolean("is_verified").notNull().default(false),
-
+  slug: varchar("slug", { length: 255 }).notNull().unique(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
