@@ -1,6 +1,6 @@
 import { db } from "#config/database.js";
 import { businesses } from "#models/business.js";
-import { customerAccount } from "#models/customerAccount.js";
+import { customerAccounts } from "#models/customerAccount.js";
 import { orders } from "#models/order.js";
 import { desc, eq, sql } from "drizzle-orm";
 
@@ -35,8 +35,8 @@ export const getCustomers = async (userId, businessId) => {
 
   const savedNotes = await db
     .select()
-    .from(customerAccount)
-    .where(eq(customerAccount.businessId, businessId));
+    .from(customerAccounts)
+    .where(eq(customerAccounts.businessId, businessId));
   const notesByPhone = Object.fromEntries(
     savedNotes.map((c) => [c.phone, c.notes]),
   );
@@ -63,17 +63,19 @@ export const saveCustomerNote = async (
 
   const existing = await db
     .select()
-    .from(customerAccount)
-    .where(eq(customerAccount.businessId, businessId))
+    .from(customerAccounts)
+    .where(eq(customerAccounts.businessId, businessId))
     .then((rows) => rows.find((r) => r.phone === phone));
 
   if (existing) {
     await db
-      .update(customerAccount)
+      .update(customerAccounts)
       .set({ notes })
-      .where(eq(customerAccount.id, existing.id));
+      .where(eq(customerAccounts.id, existing.id));
   } else {
-    await db.insert(customerAccount).values({ businessId, name, phone, notes });
+    await db
+      .insert(customerAccounts)
+      .values({ businessId, name, phone, notes });
   }
 
   return { message: "Note saved" };
