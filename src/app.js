@@ -1,5 +1,4 @@
 import logger from "#config/logger.js";
-import securityMiddleware from "#middlewares/security.js";
 import authRoutes from "#routes/authRoutes.js";
 import businessRoutes from "#routes/businessRoutes.js";
 import customerRoutes from "#routes/customerRoutes.js";
@@ -61,8 +60,6 @@ app.use(
     stream: { write: (message) => logger.info(message.trim()) },
   }),
 );
-
-app.use(securityMiddleware);
 
 app.get("/", (req, res) => {
   logger.info("hello from devops");

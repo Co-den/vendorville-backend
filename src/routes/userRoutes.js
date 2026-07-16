@@ -1,18 +1,20 @@
 import {
-    createNewUser,
-    deleteUserData,
-    fetchAllUsers,
-    fetchUserById,
-    updateUserData,
+  createNewUser,
+  deleteUserData,
+  fetchAllUsers,
+  fetchUserById,
+  updateUserData,
 } from "#controllers/userController.js";
 import authMiddleware from "#middlewares/authMiddleware.js";
 import rbacMiddleware from "#middlewares/rbacMiddleware.js";
+import securityMiddleware from "#middlewares/security.js";
 import express from "express";
 
 const router = express.Router();
 
 // All routes require authentication
 router.use(authMiddleware);
+router.use(securityMiddleware);
 
 // Admin only: fetch all users
 router.get("/", rbacMiddleware(["admin"]), fetchAllUsers);

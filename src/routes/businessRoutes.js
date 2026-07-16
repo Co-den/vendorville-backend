@@ -1,10 +1,12 @@
 import * as businessController from "#controllers/businessController.js";
 import authMiddleware from "#middlewares/authMiddleware.js";
+import securityMiddleware from "#middlewares/security.js";
 import { upload } from "#middlewares/upload.js";
 import express from "express";
 
 const router = express.Router();
 router.use(authMiddleware);
+router.use(securityMiddleware);
 
 router.get("/", businessController.getBusinesses);
 
