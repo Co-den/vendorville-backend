@@ -217,3 +217,53 @@ export const loginCustomer = async (email, password) => {
 
   return { id: account.id, name: account.name, email: account.email };
 };
+
+export const getDirectory = async ({ search, category } = {}) => {
+  let query = db
+    .select({
+      id: businesses.id,
+      name: businesses.name,
+      shortName: businesses.shortName,
+      slug: businesses.slug,
+      logoUrl: businesses.logoUrl,
+      description: businesses.description,
+      address: businesses.address,
+    })
+    .from(businesses)
+    .where(eq(businesses.visibility, "public"));
+
+  const results = await query;
+
+  // Get product counts and one representative category per business, for filtering/display
+  const enriched = await Promise.all(
+    results.map(async (biz) => {
+      const productList = await db
+        .select()
+        .from(products)
+        .where(eq(products.businessId, biz.id));
+      const categories = [...new Set(productList.map((p) => p.category))];
+      return {
+        ...biz,
+        productCount: productList.length,
+        categories,
+      };
+    }),
+  );
+
+  let filtered = enriched.filter((b) => b.productCount > 0); // only show vendors with actual products
+
+  if (search) {
+    const s = search.toLowerCase();
+    filtered = filtered.filter(
+      (b) =>
+        b.name.toLowerCase().includes(s) ||
+        b.description?.toLowerCase().includes(s),
+    );
+  }
+
+  if (category && category !== "All") {
+    filtered = filtered.filter((b) => b.categories.includes(category));
+  }
+
+  return filtered;
+};

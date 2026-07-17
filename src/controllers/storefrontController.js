@@ -74,3 +74,16 @@ export const loginCustomer = async (req, res) => {
     res.status(401).json({ message: error.message });
   }
 };
+
+export const getDirectory = async (req, res) => {
+  try {
+    const { search, category } = req.query;
+    const businesses = await storefrontService.getDirectory({
+      search,
+      category,
+    });
+    res.status(200).json({ businesses });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to load directory" });
+  }
+};

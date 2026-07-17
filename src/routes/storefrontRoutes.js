@@ -17,4 +17,7 @@ router.post(
 router.post("/customer/register", storefrontController.registerCustomer);
 router.post("/customer/login", storefrontController.loginCustomer);
 
+router.get("/directory", storefrontController.getDirectory);
+router.get("/:slug", storefrontController.getStorefront);
+
 export default router;
