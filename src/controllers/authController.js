@@ -191,6 +191,7 @@ export const login = async (req, res, next) => {
       email: user.email,
       role: user.role,
       firstName: user.firstName,
+      timeZone: user.timeZone,
     });
 
     cookies.setCookie(res, "token", token);
@@ -203,6 +204,7 @@ export const login = async (req, res, next) => {
         email: user.email,
         role: user.role,
         firstName: user.firstName,
+        timeZone: user.timeZone,
       },
     });
   } catch (error) {
@@ -247,6 +249,7 @@ export const checkAuth = async (req, res, next) => {
         email: req.user.email,
         role: req.user.role,
         firstName: req.user.firstName,
+        timeZone: req.user.timeZone,
       },
     });
   } catch (error) {

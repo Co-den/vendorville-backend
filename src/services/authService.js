@@ -240,6 +240,7 @@ export const verifyCredentials = async (email, password, pin) => {
       email: user.email,
       role: user.role,
       firstName: user.firstName,
+      timeZone: user.timeZone,
     };
   } catch (error) {
     logger.warn(`Authentication failed for email: ${email}`, {
