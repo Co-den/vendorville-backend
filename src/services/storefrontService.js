@@ -250,7 +250,7 @@ export const getDirectory = async ({ search, category } = {}) => {
     }),
   );
 
-  let filtered = enriched.filter((b) => b.productCount > 0); // only show vendors with actual products
+  let filtered = enriched.filter((b) => b.productCount > 0);
 
   if (search) {
     const s = search.toLowerCase();
