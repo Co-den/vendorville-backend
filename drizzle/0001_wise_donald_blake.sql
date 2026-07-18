@@ -1,0 +1,2 @@
+ALTER TABLE "businesses" ADD COLUMN "is_available" boolean DEFAULT true NOT NULL;--> statement-breakpoint
+ALTER TABLE "businesses" ADD COLUMN "available_days" text[] DEFAULT ARRAY['Mon','Tue','Wed','Thu','Fri','Sat'] NOT NULL;

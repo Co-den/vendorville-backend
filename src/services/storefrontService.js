@@ -6,6 +6,8 @@ import { products } from "#models/product.js";
 import bcrypt from "bcrypt";
 import { eq } from "drizzle-orm";
 
+const dayAbbrev = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
 export const getStorefront = async (slug) => {
   const bizResult = await db
     .select()
@@ -26,6 +28,9 @@ export const getStorefront = async (slug) => {
     .from(businessImages)
     .where(eq(businessImages.businessId, biz.id));
 
+  const today = dayAbbrev[new Date().getDay()];
+  const isOpenToday = biz.isAvailable && biz.availableDays.includes(today);
+
   return {
     business: {
       id: biz.id,
@@ -34,8 +39,14 @@ export const getStorefront = async (slug) => {
       logoUrl: biz.logoUrl,
       description: biz.description,
       whatsappNumber: biz.whatsappNumber,
+      businessEmail: biz.businessEmail,
+      instagram: biz.instagram,
+      tiktok: biz.tiktok,
       address: biz.address,
       premisesImages: images.map((i) => i.imageUrl),
+      isAvailable: biz.isAvailable,
+      availableDays: biz.availableDays,
+      isOpenToday,
     },
     products: productList
       .filter((p) => p.stock > 0)

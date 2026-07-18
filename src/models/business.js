@@ -1,4 +1,5 @@
 import { users } from "#models/user.js";
+import { sql } from "drizzle-orm";
 import {
   boolean,
   integer,
@@ -35,6 +36,12 @@ export const businesses = pgTable("businesses", {
 
   isVerified: boolean("is_verified").notNull().default(false),
   slug: varchar("slug", { length: 255 }).notNull().unique(),
+
+  isAvailable: boolean("is_available").notNull().default(true),
+  availableDays: text("available_days")
+    .array()
+    .notNull()
+    .default(sql`ARRAY['Mon','Tue','Wed','Thu','Fri','Sat']`),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

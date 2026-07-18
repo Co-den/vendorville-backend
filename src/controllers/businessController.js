@@ -46,3 +46,16 @@ export const deleteBusiness = async (req, res, next) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+export const updateAvailability = async (req, res) => {
+  try {
+    const business = await businessService.updateAvailability(
+      req.user.id,
+      req.params.id,
+      req.body,
+    );
+    res.status(200).json({ business });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};

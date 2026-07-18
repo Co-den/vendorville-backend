@@ -110,3 +110,31 @@ export const deleteBusiness = async (userId, businessId) => {
     .where(eq(businessImages.businessId, businessId));
   await db.delete(businesses).where(eq(businesses.id, businessId));
 };
+
+export const updateAvailability = async (
+  userId,
+  businessId,
+  { isAvailable, availableDays },
+) => {
+  const result = await db
+    .select()
+    .from(businesses)
+    .where(eq(businesses.id, businessId))
+    .limit(1);
+  if (result.length === 0 || result[0].userId !== userId) {
+    throw new Error("Business not found");
+  }
+
+  const [updated] = await db
+    .update(businesses)
+    .set({
+      isAvailable:
+        isAvailable !== undefined ? isAvailable : result[0].isAvailable,
+      availableDays: availableDays || result[0].availableDays,
+      updatedAt: new Date(),
+    })
+    .where(eq(businesses.id, businessId))
+    .returning();
+
+  return updated;
+};

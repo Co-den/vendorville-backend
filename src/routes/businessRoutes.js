@@ -20,5 +20,6 @@ router.post(
 );
 
 router.delete("/:id", businessController.deleteBusiness);
+router.patch("/:id/availability", businessController.updateAvailability);
 
 export default router;
