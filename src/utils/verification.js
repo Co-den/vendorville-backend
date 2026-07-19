@@ -64,3 +64,19 @@ export const sendVerificationEmail = async (email, firstName, code) => {
     throw error;
   }
 };
+
+export const sendGenericEmail = async (to, subject, htmlBody) => {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: "VendorVille <onboarding@yourdomain.com>",
+      to,
+      subject,
+      html: htmlBody,
+    });
+    if (error) throw new Error(error.message || "Resend API error");
+    logger.info(`Email sent to ${to}`, { id: data?.id });
+  } catch (error) {
+    logger.error(`Error sending email to ${to}`, error);
+    throw error;
+  }
+};

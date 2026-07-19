@@ -1,0 +1,1 @@
+ALTER TABLE "products" ADD COLUMN "low_stock_alert_sent" boolean DEFAULT false NOT NULL;

@@ -3,6 +3,9 @@ import logger from "#config/logger.js";
 import { businesses } from "#models/business.js";
 import { orderItems, orders } from "#models/order.js";
 import { products } from "#models/product.js";
+import { users } from "#models/user.js";
+import { notifyOrderEvent } from "#services/notificationService.js";
+import { checkAndNotifyLowStock } from "#services/productService.js";
 import { and, desc, eq } from "drizzle-orm";
 
 const assertBusinessOwnership = async (userId, businessId) => {
@@ -63,7 +66,6 @@ export const createOrder = async (userId, businessId, data) => {
     throw new Error("Order must include at least one item");
   }
 
-  // Validate stock and compute total server-side — never trust a client-submitted total
   let totalAmount = 0;
   const resolvedItems = [];
 
@@ -100,8 +102,8 @@ export const createOrder = async (userId, businessId, data) => {
 
   const orderNumber = generateOrderNumber();
 
-  const result = await db.transaction(async (tx) => {
-    const [newOrder] = await tx
+  const newOrder = await db.transaction(async (tx) => {
+    const [createdOrder] = await tx
       .insert(orders)
       .values({
         businessId,
@@ -118,7 +120,9 @@ export const createOrder = async (userId, businessId, data) => {
 
     await tx
       .insert(orderItems)
-      .values(resolvedItems.map((item) => ({ ...item, orderId: newOrder.id })));
+      .values(
+        resolvedItems.map((item) => ({ ...item, orderId: createdOrder.id })),
+      );
 
     // Decrement stock for each product sold
     for (const item of resolvedItems) {
@@ -136,14 +140,40 @@ export const createOrder = async (userId, businessId, data) => {
         .where(eq(products.id, item.productId));
     }
 
-    return newOrder;
+    return createdOrder;
   });
+
+  // Everything below runs AFTER the transaction has committed successfully
+
+  const bizResult = await db
+    .select()
+    .from(businesses)
+    .where(eq(businesses.id, businessId))
+    .limit(1);
+  const vendorResult = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, bizResult[0].userId))
+    .limit(1);
+
+  notifyOrderEvent({
+    event: "order_placed",
+    order: { ...newOrder, totalAmount: newOrder.totalAmount / 100 },
+    business: bizResult[0],
+    vendorPhone: vendorResult[0]?.phoneNumber,
+  }).catch((err) => logger.error("Notification error", err));
+
+  for (const item of resolvedItems) {
+    checkAndNotifyLowStock(item.productId).catch((err) =>
+      logger.error("Low stock check error", err),
+    );
+  }
 
   logger.info(`Order ${orderNumber} created for business ${businessId}`);
 
   return {
-    ...result,
-    totalAmount: result.totalAmount / 100,
+    ...newOrder,
+    totalAmount: newOrder.totalAmount / 100,
     items: resolvedItems.map((i) => ({ ...i, unitPrice: i.unitPrice / 100 })),
   };
 };
@@ -170,12 +200,14 @@ export const updateOrderStatus = async (
     throw new Error("Order not found");
   }
 
-  // If cancelling a previously-active order, restock the items
+  let restockedProductIds = [];
+
   if (status === "cancelled" && orderResult[0].status !== "cancelled") {
     const items = await db
       .select()
       .from(orderItems)
       .where(eq(orderItems.orderId, orderId));
+
     await db.transaction(async (tx) => {
       for (const item of items) {
         if (!item.productId) continue;
@@ -192,6 +224,7 @@ export const updateOrderStatus = async (
               updatedAt: new Date(),
             })
             .where(eq(products.id, item.productId));
+          restockedProductIds.push(item.productId);
         }
       }
       await tx
@@ -204,6 +237,35 @@ export const updateOrderStatus = async (
       .update(orders)
       .set({ status, updatedAt: new Date() })
       .where(eq(orders.id, orderId));
+  }
+
+  // Restocking can push a product back above its low-stock threshold —
+  // re-check so the alert flag resets correctly for future dips.
+  for (const productId of restockedProductIds) {
+    checkAndNotifyLowStock(productId).catch((err) =>
+      logger.error("Low stock check error", err),
+    );
+  }
+
+  const eventMap = {
+    paid: "order_paid",
+    fulfilled: "order_fulfilled",
+    cancelled: "order_cancelled",
+  };
+  if (eventMap[status]) {
+    const bizResult = await db
+      .select()
+      .from(businesses)
+      .where(eq(businesses.id, businessId))
+      .limit(1);
+    notifyOrderEvent({
+      event: eventMap[status],
+      order: {
+        ...orderResult[0],
+        totalAmount: orderResult[0].totalAmount / 100,
+      },
+      business: bizResult[0],
+    }).catch((err) => logger.error("Notification error", err));
   }
 
   logger.info(`Order ${orderId} status updated to ${status}`);

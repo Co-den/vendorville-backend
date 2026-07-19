@@ -1,8 +1,12 @@
 import { db } from "#config/database.js";
+import logger from "#config/logger.js";
 import { businesses, businessImages } from "#models/business.js";
 import { customerAccounts } from "#models/customerAccount.js";
 import { orderItems, orders } from "#models/order.js";
 import { products } from "#models/product.js";
+import { users } from "#models/user.js";
+import { notifyOrderEvent } from "#services/notificationService.js";
+import { checkAndNotifyLowStock } from "#services/productService.js";
 import bcrypt from "bcrypt";
 import { eq } from "drizzle-orm";
 
@@ -103,11 +107,13 @@ export const createGuestOrder = async (
       throw new Error(`Product not found: ${item.productId}`);
     }
     const product = productResult[0];
+
     if (product.stock < item.quantity) {
       throw new Error(
         `"${product.name}" only has ${product.stock} left in stock`,
       );
     }
+
     totalAmount += product.price * item.quantity;
     resolvedItems.push({
       productId: product.id,
@@ -122,8 +128,9 @@ export const createGuestOrder = async (
     : 0;
   const orderNumber = generateOrderNumber();
   const paystackReference = `store_${orderNumber}`;
-  const result = await db.transaction(async (tx) => {
-    const [newOrder] = await tx
+
+  const newOrder = await db.transaction(async (tx) => {
+    const [createdOrder] = await tx
       .insert(orders)
       .values({
         businessId: business.id,
@@ -144,7 +151,9 @@ export const createGuestOrder = async (
 
     await tx
       .insert(orderItems)
-      .values(resolvedItems.map((item) => ({ ...item, orderId: newOrder.id })));
+      .values(
+        resolvedItems.map((item) => ({ ...item, orderId: createdOrder.id })),
+      );
 
     for (const item of resolvedItems) {
       const productResult = await tx
@@ -161,16 +170,42 @@ export const createGuestOrder = async (
         .where(eq(products.id, item.productId));
     }
 
-    return newOrder;
+    return createdOrder;
   });
 
+  // Everything below runs AFTER the transaction has committed
+
+  const vendorResult = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, business.userId))
+    .limit(1);
+
+  notifyOrderEvent({
+    event: "order_placed",
+    order: {
+      ...newOrder,
+      totalAmount: newOrder.totalAmount / 100,
+      deliveryFee: newOrder.deliveryFee / 100,
+    },
+    business,
+    vendorPhone: vendorResult[0]?.phoneNumber,
+  }).catch((err) => logger.error("Notification error", err));
+
+  for (const item of resolvedItems) {
+    checkAndNotifyLowStock(item.productId).catch((err) =>
+      logger.error("Low stock check error", err),
+    );
+  }
+
   return {
-    ...result,
-    totalAmount: result.totalAmount / 100,
-    deliveryFee: result.deliveryFee / 100,
+    ...newOrder,
+    totalAmount: newOrder.totalAmount / 100,
+    deliveryFee: newOrder.deliveryFee / 100,
     items: resolvedItems.map((i) => ({ ...i, unitPrice: i.unitPrice / 100 })),
   };
 };
+
 export const markOrderPaidByReference = async (
   reference,
   verifiedAmountKobo,
@@ -192,6 +227,18 @@ export const markOrderPaidByReference = async (
     .update(orders)
     .set({ status: "paid", updatedAt: new Date() })
     .where(eq(orders.id, order.id));
+
+  const bizResult = await db
+    .select()
+    .from(businesses)
+    .where(eq(businesses.id, order.businessId))
+    .limit(1);
+  notifyOrderEvent({
+    event: "order_paid",
+    order: { ...order, totalAmount: order.totalAmount / 100 },
+    business: bizResult[0],
+  }).catch((err) => logger.error("Notification error", err));
+
   return { message: "Order marked as paid" };
 };
 
@@ -227,54 +274,4 @@ export const loginCustomer = async (email, password) => {
   if (!valid) throw new Error("Invalid email or password");
 
   return { id: account.id, name: account.name, email: account.email };
-};
-
-export const getDirectory = async ({ search, category } = {}) => {
-  let query = db
-    .select({
-      id: businesses.id,
-      name: businesses.name,
-      shortName: businesses.shortName,
-      slug: businesses.slug,
-      logoUrl: businesses.logoUrl,
-      description: businesses.description,
-      address: businesses.address,
-    })
-    .from(businesses)
-    .where(eq(businesses.visibility, "public"));
-
-  const results = await query;
-
-  // Get product counts and one representative category per business, for filtering/display
-  const enriched = await Promise.all(
-    results.map(async (biz) => {
-      const productList = await db
-        .select()
-        .from(products)
-        .where(eq(products.businessId, biz.id));
-      const categories = [...new Set(productList.map((p) => p.category))];
-      return {
-        ...biz,
-        productCount: productList.length,
-        categories,
-      };
-    }),
-  );
-
-  let filtered = enriched.filter((b) => b.productCount > 0);
-
-  if (search) {
-    const s = search.toLowerCase();
-    filtered = filtered.filter(
-      (b) =>
-        b.name.toLowerCase().includes(s) ||
-        b.description?.toLowerCase().includes(s),
-    );
-  }
-
-  if (category && category !== "All") {
-    filtered = filtered.filter((b) => b.categories.includes(category));
-  }
-
-  return filtered;
 };
