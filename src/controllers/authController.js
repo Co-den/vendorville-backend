@@ -67,6 +67,7 @@ export const signup = async (req, res, next) => {
     logger.info(`User ${email} signed up successfully`);
     res.status(201).json({
       message: "User signed up successfully",
+      token,
       user: {
         id: user.id,
         firstName: user.firstName,
@@ -115,6 +116,7 @@ export const verifyEmail = async (req, res, next) => {
 
     res.status(200).json({
       message: "Email verified successfully",
+      token,
       user: {
         id: user.id,
         firstName: user.firstName,
@@ -199,6 +201,7 @@ export const login = async (req, res, next) => {
 
     res.status(200).json({
       message: "User logged in successfully",
+      token,
       user: {
         id: user.id,
         email: user.email,
