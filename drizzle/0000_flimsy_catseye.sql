@@ -24,6 +24,8 @@ CREATE TABLE "businesses" (
 	"description" text,
 	"is_verified" boolean DEFAULT false NOT NULL,
 	"slug" varchar(255) NOT NULL,
+	"is_available" boolean DEFAULT true NOT NULL,
+	"available_days" text[] DEFAULT ARRAY['Mon','Tue','Wed','Thu','Fri','Sat'] NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "businesses_slug_unique" UNIQUE("slug")
@@ -37,6 +39,17 @@ CREATE TABLE "customer_accounts" (
 	"password" varchar(255) NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "customer_accounts_email_unique" UNIQUE("email")
+);
+--> statement-breakpoint
+CREATE TABLE "notifications" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"order_id" integer,
+	"channel" varchar(20) NOT NULL,
+	"recipient" varchar(255) NOT NULL,
+	"event" varchar(30) NOT NULL,
+	"status" varchar(20) DEFAULT 'sent' NOT NULL,
+	"error_message" text,
+	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "order_items" (
@@ -79,6 +92,7 @@ CREATE TABLE "products" (
 	"price" integer NOT NULL,
 	"stock" integer DEFAULT 0 NOT NULL,
 	"low_stock_threshold" integer DEFAULT 10 NOT NULL,
+	"low_stock_alert_sent" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
