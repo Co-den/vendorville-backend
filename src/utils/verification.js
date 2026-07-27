@@ -16,6 +16,8 @@ const transporter = nodemailer.createTransport({
     user: process.env.MAILERSEND_SMTP_USER,
     pass: process.env.MAILERSEND_SMTP_PASS,
   },
+  logger: true,
+  debug: true,
 });
 
 // Generate a 6-digit numeric verification code

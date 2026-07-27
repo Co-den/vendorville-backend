@@ -22,4 +22,7 @@ router.post(
 router.delete("/:id", businessController.deleteBusiness);
 router.patch("/:id/availability", businessController.updateAvailability);
 
+router.get("/:id/reviews", businessController.getReviews);
+router.post("/:id/reviews/:reviewId/reply", businessController.replyToReview);
+
 export default router;

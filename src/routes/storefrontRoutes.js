@@ -19,4 +19,7 @@ router.post(
 router.post("/customer/register", storefrontController.registerCustomer);
 router.post("/customer/login", storefrontController.loginCustomer);
 
+router.get("/:slug/reviews", storefrontController.getPublicReviews);
+router.post("/:slug/reviews", storefrontController.submitReview);
+
 export default router;

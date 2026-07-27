@@ -1,3 +1,4 @@
+import * as reviewService from "#services/reviewService.js";
 import * as storefrontService from "#services/storefrontService.js";
 import { cookies } from "#utils/cookies.js";
 import { jwtSign } from "#utils/jwt.js";
@@ -85,5 +86,27 @@ export const getDirectory = async (req, res) => {
     res.status(200).json({ businesses });
   } catch (error) {
     res.status(500).json({ message: "Failed to load directory" });
+  }
+};
+
+export const getPublicReviews = async (req, res) => {
+  try {
+    const bizResult = await storefrontService.getBusinessBySlugForReviews(
+      req.params.slug,
+    );
+    const reviews = await reviewService.getReviews(bizResult.id);
+    const stats = await reviewService.getReviewStats(bizResult.id);
+    res.status(200).json({ reviews, stats });
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+};
+
+export const submitReview = async (req, res) => {
+  try {
+    const review = await reviewService.submitReview(req.params.slug, req.body);
+    res.status(201).json({ review, message: "Thanks for your review!" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 };

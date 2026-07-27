@@ -1,5 +1,6 @@
 import logger from "#config/logger.js";
 import * as businessService from "#services/businessService.js";
+import * as reviewService from "#services/reviewService.js";
 
 export const getBusinesses = async (req, res, next) => {
   try {
@@ -55,6 +56,30 @@ export const updateAvailability = async (req, res) => {
       req.body,
     );
     res.status(200).json({ business });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+export const getReviews = async (req, res) => {
+  try {
+    const reviews = await reviewService.getReviews(req.params.id);
+    const stats = await reviewService.getReviewStats(req.params.id);
+    res.status(200).json({ reviews, stats });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+export const replyToReview = async (req, res) => {
+  try {
+    const review = await reviewService.replyToReview(
+      req.user.id,
+      req.params.id,
+      req.params.reviewId,
+      req.body.reply,
+    );
+    res.status(200).json({ review });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

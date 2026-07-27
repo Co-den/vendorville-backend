@@ -275,3 +275,13 @@ export const loginCustomer = async (email, password) => {
 
   return { id: account.id, name: account.name, email: account.email };
 };
+
+export const getBusinessBySlugForReviews = async (slug) => {
+  const bizResult = await db
+    .select()
+    .from(businesses)
+    .where(eq(businesses.slug, slug))
+    .limit(1);
+  if (bizResult.length === 0) throw new Error("Store not found");
+  return bizResult[0];
+};
