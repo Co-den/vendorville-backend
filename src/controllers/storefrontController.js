@@ -45,7 +45,7 @@ export const verifyPaystackPayment = async (req, res) => {
   }
 };
 
-export const registerCustomer = async (req, res) => {
+/*export const registerCustomer = async (req, res) => {
   try {
     const account = await storefrontService.registerCustomer(req.body);
     const token = jwtSign.sign({
@@ -75,7 +75,7 @@ export const loginCustomer = async (req, res) => {
     res.status(401).json({ message: error.message });
   }
 };
-
+*/
 export const getDirectory = async (req, res) => {
   try {
     const { search, category } = req.query;

@@ -17,8 +17,8 @@ router.post(
   "/:slug/verify-payment",
   storefrontController.verifyPaystackPayment,
 );
-router.post("/customer/register", storefrontController.registerCustomer);
-router.post("/customer/login", storefrontController.loginCustomer);
+//router.post("/customer/register", storefrontController.registerCustomer);
+//router.post("/customer/login", storefrontController.loginCustomer);
 
 router.get("/:slug/reviews", storefrontController.getPublicReviews);
 router.post("/:slug/reviews", storefrontController.submitReview);
