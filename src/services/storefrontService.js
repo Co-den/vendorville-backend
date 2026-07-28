@@ -285,3 +285,44 @@ export const getBusinessBySlugForReviews = async (slug) => {
   if (bizResult.length === 0) throw new Error("Store not found");
   return bizResult[0];
 };
+
+export const getCustomerOrders = async (customerAccountId) => {
+  const list = await db
+    .select()
+    .from(orders)
+    .where(eq(orders.customerAccountId, customerAccountId))
+    .orderBy(desc(orders.createdAt));
+
+  return Promise.all(
+    list.map(async (order) => {
+      const items = await db
+        .select()
+        .from(orderItems)
+        .where(eq(orderItems.orderId, order.id));
+      const bizResult = await db
+        .select()
+        .from(businesses)
+        .where(eq(businesses.id, order.businessId))
+        .limit(1);
+      return {
+        ...order,
+        totalAmount: order.totalAmount / 100,
+        deliveryFee: order.deliveryFee / 100,
+        businessName: bizResult[0]?.name,
+        businessSlug: bizResult[0]?.slug,
+        items: items.map((i) => ({ ...i, unitPrice: i.unitPrice / 100 })),
+      };
+    }),
+  );
+};
+
+export const getCustomerById = async (id) => {
+  const result = await db
+    .select()
+    .from(customerAccounts)
+    .where(eq(customerAccounts.id, id))
+    .limit(1);
+  if (result.length === 0) return null;
+  const { password, ...safe } = result[0];
+  return safe;
+};

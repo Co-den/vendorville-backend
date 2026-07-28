@@ -1,6 +1,6 @@
 import { jwtSign } from "#utils/jwt.js";
 
-export const softCustomerAuth = (req, res, next) => {
+export const customerAuth = (req, res, next) => {
   let token = req.cookies?.customer_token;
 
   if (!token && req.headers.authorization?.startsWith("Bearer ")) {
@@ -8,14 +8,15 @@ export const softCustomerAuth = (req, res, next) => {
   }
 
   if (!token) {
-    req.customer = null;
-    return next();
+    return res.status(401).json({ message: "Please log in to view this." });
   }
 
   try {
     req.customer = jwtSign.verify(token);
+    next();
   } catch {
-    req.customer = null;
+    return res
+      .status(401)
+      .json({ message: "Session expired. Please log in again." });
   }
-  next();
 };
