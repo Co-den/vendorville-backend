@@ -4,6 +4,11 @@ import { paystackApi } from "#utils/paystack.js";
 import { eq } from "drizzle-orm";
 
 const planPrices = { starter: 5500, professional: 10500, enterprise: 15500 };
+export const staffLimits = {
+  starter: 1,
+  professional: 3,
+  enterprise: Infinity,
+};
 
 export const getSubscription = async (userId) => {
   const result = await db

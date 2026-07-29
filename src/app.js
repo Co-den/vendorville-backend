@@ -4,6 +4,7 @@ import businessRoutes from "#routes/businessRoutes.js";
 import customerRoutes from "#routes/customerRoutes.js";
 import orderRoutes from "#routes/orderRoutes.js";
 import productRoutes from "#routes/productRoutes.js";
+import staffAuthRoutes from "#routes/staffAuthRoutes.js";
 import storefrontRoutes from "#routes/storefrontRoutes.js";
 import subscriptionRoutes from "#routes/subscriptionRoutes.js";
 import userRoutes from "#routes/userRoutes.js";
@@ -89,6 +90,7 @@ app.use("/api/businesses/:businessId/orders", orderRoutes);
 app.use("/api/businesses/:businessId/customers", customerRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/store", storefrontRoutes);
+app.use("/api/staff-auth", staffAuthRoutes);
 
 app.use("/nonexsistent", (req, res) => {
   res.status(404).json({ error: "Route not found" });
