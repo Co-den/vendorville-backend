@@ -33,4 +33,6 @@ router.post("/:id/staff", staffController.inviteStaff);
 router.delete("/:id/staff/:staffId", staffController.removeStaff);
 router.patch("/:id/staff/:staffId/active", staffController.toggleStaffActive);
 
+router.post("/:id/ai-order", businessController.parseAiOrder);
+
 export default router;

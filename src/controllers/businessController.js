@@ -1,6 +1,20 @@
 import logger from "#config/logger.js";
+import * as aiOrderService from "#services/aiOrderService.js";
 import * as businessService from "#services/businessService.js";
 import * as reviewService from "#services/reviewService.js";
+
+export const parseAiOrder = async (req, res) => {
+  try {
+    const items = await aiOrderService.parseOrderFromText(
+      req.user.id,
+      req.params.id,
+      req.body.text,
+    );
+    res.status(200).json({ items });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
 export const getBusinesses = async (req, res, next) => {
   try {
