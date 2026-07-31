@@ -1,10 +1,16 @@
 import * as orderController from "#controllers/orderController.js";
-import authMiddleware from "#middlewares/authMiddleware.js";
+//import authMiddleware from "#middlewares/authMiddleware.js";
+import {
+  flexibleAuth,
+  restrictToOwnBusiness,
+} from "#middlewares/flexibleAuth.js";
 import securityMiddleware from "#middlewares/security.js";
 import express from "express";
 
 const router = express.Router({ mergeParams: true });
-router.use(authMiddleware);
+//router.use(authMiddleware);
+router.use(flexibleAuth);
+router.use(restrictToOwnBusiness);
 router.use(securityMiddleware);
 
 router.get("/", orderController.getOrders);

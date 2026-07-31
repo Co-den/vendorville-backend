@@ -16,12 +16,23 @@ export const parseAiOrder = async (req, res) => {
   }
 };
 
+//ALL BUSINESS BY OWNER
 export const getBusinesses = async (req, res, next) => {
   try {
     const list = await businessService.getUserBusinesses(req.user.id);
     res.status(200).json({ businesses: list });
   } catch (error) {
     next(error);
+  }
+};
+
+//BUSINESS BY STAFF
+export const getStaffBusiness = async (req, res) => {
+  try {
+    const business = await businessService.getBusinessById(req.user.businessId);
+    res.status(200).json({ business });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 };
 

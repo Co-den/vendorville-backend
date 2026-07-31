@@ -138,3 +138,13 @@ export const updateAvailability = async (
 
   return updated;
 };
+
+export const getBusinessById = async (businessId) => {
+  const result = await db
+    .select()
+    .from(businesses)
+    .where(eq(businesses.id, businessId))
+    .limit(1);
+  if (result.length === 0) throw new Error("Business not found");
+  return result[0];
+};
