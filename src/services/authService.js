@@ -249,3 +249,22 @@ export const verifyCredentials = async (email, password, pin) => {
     throw error;
   }
 };
+
+
+// change password
+export const changePassword = async (userId, currentPassword, newPassword) => {
+  const userResult = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  if (userResult.length === 0) throw new Error("User not found");
+  const user = userResult[0];
+
+  const isValid = await bcrypt.compare(currentPassword, user.password);
+  if (!isValid) throw new Error("Current password is incorrect");
+
+  if (newPassword.length < 8) throw new Error("New password must be at least 8 characters");
+
+  const hashed = await hashpassword(newPassword);
+
+  await db.update(users).set({ password: hashed, updatedAt: new Date() }).where(eq(users.id, userId));
+
+  return { message: "Password updated successfully" };
+};

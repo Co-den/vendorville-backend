@@ -23,4 +23,6 @@ router.post("/verify-email", verifyEmail);
 
 router.post("/resend-code", resendCode);
 
+router.post("/change-password", authMiddleware, authController.changePassword);
+
 export default router;

@@ -29,6 +29,12 @@ const authMiddleware = (req, res, next) => {
     }
 
     const decoded = jwtSign.verify(token);
+    if (decoded.type === "staff" || decoded.type === "customer") {
+      return res.status(403).json({
+        error: "Forbidden",
+        message: "This action requires a vendor account.",
+      });
+    }
     req.user = {
       id: decoded.id,
       email: decoded.email,

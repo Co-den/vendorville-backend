@@ -259,3 +259,17 @@ export const checkAuth = async (req, res, next) => {
     next(error);
   }
 };
+
+
+export const changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "Current and new password are required" });
+    }
+    const result = await authService.changePassword(req.user.id, currentPassword, newPassword);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
