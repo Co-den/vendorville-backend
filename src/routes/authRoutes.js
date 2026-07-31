@@ -1,4 +1,5 @@
 import {
+  changePassword,
   checkAuth,
   login,
   logout,
@@ -23,6 +24,6 @@ router.post("/verify-email", verifyEmail);
 
 router.post("/resend-code", resendCode);
 
-router.post("/change-password", authMiddleware, authController.changePassword);
+router.post("/change-password", authMiddleware, changePassword);
 
 export default router;
