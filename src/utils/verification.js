@@ -7,14 +7,13 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// MailerSend SMTP relay transporter
+// Mailtrap SMTP relay transporter
 const transporter = nodemailer.createTransport({
-  host: "smtp.mailersend.net",
+  host: "live.smtp.mailtrap.io",
   port: 587,
-  secure: false,
   auth: {
-    user: process.env.MAILERSEND_SMTP_USER,
-    pass: process.env.MAILERSEND_SMTP_PASS,
+    user: "api",
+    pass: process.env.MAILTRAP_API_TOKEN,
   },
   logger: true,
   debug: true,
@@ -31,7 +30,7 @@ export const sendVerificationEmail = async (email, firstName, code) => {
     const logoContent = fs.readFileSync(logoPath).toString("base64");
 
     await transporter.sendMail({
-      from: `"VendorVille" <${process.env.MAILERSEND_SENDER_EMAIL}>`,
+      from: `"VendorVille" <${process.env.MAILTRAP_SENDER_EMAIL}>`,
       to: email,
       subject: "Verify your VendorVille account",
       html: `
@@ -67,7 +66,7 @@ export const sendVerificationEmail = async (email, firstName, code) => {
 export const sendGenericEmail = async (to, subject, htmlBody) => {
   try {
     await transporter.sendMail({
-      from: `"VendorVille" <${process.env.MAILERSEND_SENDER_EMAIL}>`,
+      from: `"VendorVille" <${process.env.MAILTRAP_SENDER_EMAIL}>`,
       to,
       subject,
       html: htmlBody,
