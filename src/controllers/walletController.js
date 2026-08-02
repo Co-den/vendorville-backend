@@ -101,15 +101,15 @@ export const getBanks = async (req, res) => {
 
 export const resolveAccount = async (req, res) => {
   try {
-    const { bankCode, accountNumber } = req.body;
-    if (!bankCode || !accountNumber) {
+    const { bankName, accountNumber } = req.body;
+    if (!bankName || !accountNumber) {
       return res
         .status(400)
-        .json({ message: "Bank code and account number are required" });
+        .json({ message: "Bank name and account number are required" });
     }
     const result = await walletService.resolveAccountDetails(
       accountNumber,
-      bankCode,
+      bankName,
     );
     res.status(200).json(result);
   } catch (error) {
