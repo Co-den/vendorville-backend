@@ -326,3 +326,23 @@ export const getCustomerById = async (id) => {
   const { password, ...safe } = result[0];
   return safe;
 };
+
+export const getDirectory = async ({ search, category }) => {
+  const conditions = [eq(businesses.visibility, "public")];
+
+  if (search) {
+    conditions.push(ilike(businesses.name, `%${search}%`));
+  }
+
+  if (category) {
+    conditions.push(eq(businesses.category, category));
+  }
+
+  const result = await db
+    .select()
+    .from(businesses)
+    .where(and(...conditions))
+    .orderBy(businesses.name);
+
+  return result;
+};
