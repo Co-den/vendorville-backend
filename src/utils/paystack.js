@@ -46,10 +46,10 @@ export const paystackApi = {
     }
   },
 
-  resolveAccount: async (accountNumber, bankCode) => {
+  resolveAccount: async (accountNumber, bankName) => {
     try {
       const { data } = await paystack.get(
-        `/bank/resolve?account_number=${accountNumber}&bank_code=${bankCode}`,
+        `/bank/resolve?account_number=${accountNumber}&bank_name=${bankName}`,
       );
       return data.data; // { account_number, account_name }
     } catch (error) {
@@ -63,13 +63,13 @@ export const paystackApi = {
     }
   },
 
-  createTransferRecipient: async ({ accountNumber, bankCode, accountName }) => {
+  createTransferRecipient: async ({ accountNumber, bankName, accountName }) => {
     try {
       const { data } = await paystack.post("/transferrecipient", {
         type: "nuban",
         name: accountName,
         account_number: accountNumber,
-        bank_code: bankCode,
+        bank_name: bankName,
         currency: "NGN",
       });
       return data.data; // includes recipient_code

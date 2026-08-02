@@ -42,15 +42,14 @@ export const getBankAccounts = async (req, res, next) => {
 
 export const addBankAccount = async (req, res, next) => {
   try {
-    const { bankCode, accountNumber, bankName } = req.body;
-    if (!bankCode || !accountNumber || !bankName) {
+    const { accountNumber, bankName } = req.body;
+    if (!accountNumber || !bankName) {
       return res
         .status(400)
-        .json({ message: "Bank code, name, and account number are required" });
+        .json({ message: "Bank name and account number are required" });
     }
     const account = await walletService.addBankAccount(
       req.user.id,
-      bankCode,
       accountNumber,
       bankName,
     );
