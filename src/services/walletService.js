@@ -266,11 +266,11 @@ export const getBanks = async () => {
   return banks.map((b) => ({ name: b.name, code: b.code }));
 };
 
-export const resolveAccountDetails = async (accountNumber, bankCode) => {
-  const resolved = await paystackApi.resolveAccount(accountNumber, bankCode);
+export const resolveAccountDetails = async (accountNumber, bankName) => {
+  const resolved = await paystackApi.resolveAccount(accountNumber, bankName);
   return {
     accountName: resolved.account_name,
     accountNumber: resolved.account_number,
-    bankCode,
+    bankName: resolved.bank_name,
   };
 };
