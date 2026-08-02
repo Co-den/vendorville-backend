@@ -42,14 +42,15 @@ export const getBankAccounts = async (req, res, next) => {
 
 export const addBankAccount = async (req, res, next) => {
   try {
-    const { accountNumber, bankName } = req.body;
-    if (!accountNumber || !bankName) {
+    const { bankCode, accountNumber, bankName } = req.body;
+    if (!bankCode || !accountNumber || !bankName) {
       return res
         .status(400)
-        .json({ message: "Bank name and account number are required" });
+        .json({ message: "Bank code, name, and account number are required" });
     }
     const account = await walletService.addBankAccount(
       req.user.id,
+      bankCode,
       accountNumber,
       bankName,
     );
@@ -100,15 +101,15 @@ export const getBanks = async (req, res) => {
 
 export const resolveAccount = async (req, res) => {
   try {
-    const { bankName, accountNumber } = req.body;
-    if (!bankName || !accountNumber) {
+    const { bankCode, accountNumber } = req.body;
+    if (!bankCode || !accountNumber) {
       return res
         .status(400)
-        .json({ message: "Bank name and account number are required" });
+        .json({ message: "Bank code and account number are required" });
     }
     const result = await walletService.resolveAccountDetails(
       accountNumber,
-      bankName,
+      bankCode,
     );
     res.status(200).json(result);
   } catch (error) {
