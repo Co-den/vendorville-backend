@@ -1,5 +1,5 @@
 import logger from "#config/logger.js";
-import { apiLimiter } from "#middlewares/rateLimiters.js";
+import apiLimiter from "#middlewares/rateLimiters.js";
 import authRoutes from "#routes/authRoutes.js";
 import businessRoutes from "#routes/businessRoutes.js";
 import customerRoutes from "#routes/customerRoutes.js";
