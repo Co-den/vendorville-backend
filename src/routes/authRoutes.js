@@ -7,23 +7,23 @@ import {
   signup,
   verifyEmail,
 } from "#controllers/authController.js";
+import {
+  authLimiter,
+  registerLimiter,
+  resendCodeLimiter,
+} from "#middlewares/rateLimiters.js";
 import authMiddleware from "#src/middlewares/authMiddleware.js";
+
 import express from "express";
 
 const router = express.Router();
 
-router.post("/signup", signup);
-
-router.get("/check-auth", authMiddleware, checkAuth);
-
-router.post("/login", login);
-
-router.post("/logout", logout);
-
-router.post("/verify-email", verifyEmail);
-
-router.post("/resend-code", resendCode);
-
+router.post("/signup", registerLimiter, signup);
+router.post("/login", authLimiter, login);
+router.post("/verify-email", authLimiter, verifyEmail);
+router.post("/resend-code", resendCodeLimiter, resendCode);
 router.patch("/change-password", authMiddleware, changePassword);
+router.get("/check-auth", authMiddleware, checkAuth);
+router.post("/logout", logout);
 
 export default router;

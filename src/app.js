@@ -1,4 +1,5 @@
 import logger from "#config/logger.js";
+import { apiLimiter } from "#middlewares/rateLimiters.js";
 import authRoutes from "#routes/authRoutes.js";
 import businessRoutes from "#routes/businessRoutes.js";
 import customerRoutes from "#routes/customerRoutes.js";
@@ -17,6 +18,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 
 const app = express();
+app.set("trust proxy", 1);
 app.use(
   "/api/webhooks",
   express.raw({ type: "application/json" }),
@@ -79,6 +81,8 @@ app.get("/health", (req, res) => {
 app.get("/api", (req, res) => {
   res.status(200).json({ message: "DevOps API! is running" });
 });
+// Rate limiting middleware for all API routes
+app.use("/api", apiLimiter);
 
 // Routes
 app.use("/api/auth", authRoutes);

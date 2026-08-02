@@ -1,20 +1,22 @@
 import * as businessController from "#controllers/businessController.js";
 import * as staffController from "#controllers/staffController.js";
 //import authMiddleware from "#middlewares/authMiddleware.js";
+import { aiLimiter } from "#middlewares/rateLimiters.js";
+
 import {
   flexibleAuth,
   managerOrOwner,
   ownerOnly,
   restrictToOwnBusiness,
 } from "#middlewares/flexibleAuth.js";
-import securityMiddleware from "#middlewares/security.js";
+//import securityMiddleware from "#middlewares/security.js";
 import { upload } from "#middlewares/upload.js";
 import express from "express";
 
 const router = express.Router();
 //router.use(authMiddleware);
 router.use(flexibleAuth);
-router.use(securityMiddleware);
+//router.use(securityMiddleware);
 
 router.get("/", ownerOnly, businessController.getBusinesses);
 router.get(
@@ -74,6 +76,7 @@ router.post(
   "/:id/ai-order",
   ownerOnly,
   restrictToOwnBusiness,
+  aiLimiter,
   businessController.parseAiOrder,
 );
 
