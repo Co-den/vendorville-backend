@@ -166,17 +166,11 @@ export const getBankAccounts = async (userId) => {
   }));
 };
 
-export const addBankAccount = async (
-  userId,
-  bankCode,
-  accountNumber,
-  bankName,
-) => {
-  const resolved = await paystackApi.resolveAccount(accountNumber, bankCode);
+export const addBankAccount = async (userId, accountNumber, bankName) => {
+  const resolved = await paystackApi.resolveAccount(accountNumber, bankName);
 
   const recipient = await paystackApi.createTransferRecipient({
     accountNumber,
-    bankCode,
     accountName: resolved.account_name,
   });
 
@@ -190,7 +184,6 @@ export const addBankAccount = async (
     .insert(bankAccounts)
     .values({
       userId,
-      bankCode,
       bankName,
       accountNumber,
       accountName: resolved.account_name,
