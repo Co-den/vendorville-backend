@@ -1,5 +1,5 @@
 import logger from "#config/logger.js";
-import apiLimiter from "#middlewares/rateLimiters.js";
+import rateLimiters from "#middlewares/rateLimiters.js";
 import authRoutes from "#routes/authRoutes.js";
 import businessRoutes from "#routes/businessRoutes.js";
 import customerRoutes from "#routes/customerRoutes.js";
@@ -82,7 +82,7 @@ app.get("/api", (req, res) => {
   res.status(200).json({ message: "DevOps API! is running" });
 });
 // Rate limiting middleware for all API routes
-app.use("/api", apiLimiter);
+app.use("/api", rateLimiters);
 
 // Routes
 app.use("/api/auth", authRoutes);
