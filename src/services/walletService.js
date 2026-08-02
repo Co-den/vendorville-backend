@@ -166,13 +166,12 @@ export const getBankAccounts = async (userId) => {
   }));
 };
 
-export const addBankAccount = async (
-  userId,
-  bankCode,
-  accountNumber,
-  bankName,
-) => {
+export const addBankAccount = async (userId, bankCode, accountNumber) => {
   const resolved = await paystackApi.resolveAccount(accountNumber, bankCode);
+
+  const banks = await paystackApi.getBanks();
+  const bank = banks.find((b) => b.code === bankCode);
+  const bankName = bank?.name || "Unknown Bank";
 
   const recipient = await paystackApi.createTransferRecipient({
     accountNumber,
