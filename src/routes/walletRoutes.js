@@ -1,7 +1,7 @@
 import * as walletController from "#controllers/walletController.js";
 import authMiddleware from "#middlewares/authMiddleware.js";
 //import securityMiddleware from "#middlewares/security.js";
-import { paymentLimiter } from "#middlewares/rateLimiters.js";
+import { paymentLimiter } from "#src/middlewares/rateLimiters.js";
 import express from "express";
 
 const router = express.Router();

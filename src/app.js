@@ -1,5 +1,4 @@
 import logger from "#config/logger.js";
-import { apiLimiter } from "#middlewares/rateLimiters.js";
 import authRoutes from "#routes/authRoutes.js";
 import businessRoutes from "#routes/businessRoutes.js";
 import customerRoutes from "#routes/customerRoutes.js";
@@ -11,6 +10,7 @@ import subscriptionRoutes from "#routes/subscriptionRoutes.js";
 import userRoutes from "#routes/userRoutes.js";
 import walletRoutes from "#routes/walletRoutes.js";
 import webhookRoutes from "#routes/webhookRoutes.js";
+import { apiLimiter } from "#src/middlewares/rateLimiters.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";

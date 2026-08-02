@@ -7,12 +7,12 @@ import {
   signup,
   verifyEmail,
 } from "#controllers/authController.js";
+import authMiddleware from "#src/middlewares/authMiddleware.js";
 import {
   authLimiter,
   registerLimiter,
   resendCodeLimiter,
-} from "#middlewares/rateLimiters.js";
-import authMiddleware from "#src/middlewares/authMiddleware.js";
+} from "#src/middlewares/rateLimiters.js";
 
 import express from "express";
 

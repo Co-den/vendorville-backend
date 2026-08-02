@@ -1,12 +1,12 @@
 import * as storefrontController from "#controllers/storefrontController.js";
 import { customerAuth } from "#middlewares/customerAuth.js";
+import { softCustomerAuth } from "#middlewares/softCustomerAuth.js";
 import {
   authLimiter,
   orderLimiter,
   registerLimiter,
   reviewLimiter,
-} from "#middlewares/rateLimiters.js";
-import { softCustomerAuth } from "#middlewares/softCustomerAuth.js";
+} from "#src/middlewares/rateLimiters.js";
 import express from "express";
 
 const router = express.Router();

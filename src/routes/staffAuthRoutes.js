@@ -1,5 +1,5 @@
 import * as staffController from "#controllers/staffController.js";
-import { authLimiter } from "#middlewares/rateLimiters.js";
+import { authLimiter } from "#src/middlewares/rateLimiters.js";
 import express from "express";
 
 const router = express.Router();

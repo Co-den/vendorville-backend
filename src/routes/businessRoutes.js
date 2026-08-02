@@ -1,7 +1,7 @@
 import * as businessController from "#controllers/businessController.js";
 import * as staffController from "#controllers/staffController.js";
 //import authMiddleware from "#middlewares/authMiddleware.js";
-import { aiLimiter } from "#middlewares/rateLimiters.js";
+import { aiLimiter } from "#src/middlewares/rateLimiters.js";
 
 import {
   flexibleAuth,

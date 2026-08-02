@@ -1,6 +1,6 @@
 import * as subscriptionController from "#controllers/subscriptionController.js";
 import authMiddleware from "#middlewares/authMiddleware.js";
-import { paymentLimiter } from "#middlewares/rateLimiters.js";
+import { paymentLimiter } from "#src/middlewares/rateLimiters.js";
 //import securityMiddleware from "#middlewares/security.js";
 import express from "express";
 
