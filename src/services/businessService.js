@@ -121,8 +121,23 @@ export const updateAvailability = async (
     .from(businesses)
     .where(eq(businesses.id, businessId))
     .limit(1);
+
   if (result.length === 0 || result[0].userId !== userId) {
     throw new Error("Business not found");
+  }
+
+  const validDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  if (
+    availableDays !== undefined &&
+    (!Array.isArray(availableDays) ||
+      availableDays.some((day) => !validDays.includes(day)))
+  ) {
+    throw new Error("Invalid availableDays");
+  }
+
+  if (isAvailable !== undefined && typeof isAvailable !== "boolean") {
+    throw new Error("isAvailable must be a boolean");
   }
 
   const [updated] = await db
@@ -130,7 +145,8 @@ export const updateAvailability = async (
     .set({
       isAvailable:
         isAvailable !== undefined ? isAvailable : result[0].isAvailable,
-      availableDays: availableDays || result[0].availableDays,
+      availableDays:
+        availableDays !== undefined ? availableDays : result[0].availableDays,
       updatedAt: new Date(),
     })
     .where(eq(businesses.id, businessId))
