@@ -15,5 +15,7 @@ router.get("/bank-accounts", walletController.getBankAccounts);
 router.post("/bank-accounts", walletController.addBankAccount);
 router.delete("/bank-accounts/:id", walletController.removeBankAccount);
 router.post("/withdraw", walletController.withdraw);
+router.get("/banks", walletController.getBanks);
+router.post("/resolve-account", walletController.resolveAccount);
 
 export default router;

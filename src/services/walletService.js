@@ -260,3 +260,17 @@ export const withdrawFromWallet = async (
     transferStatus: transfer.status,
   };
 };
+
+export const getBanks = async () => {
+  const banks = await paystackApi.getBanks();
+  return banks.map((b) => ({ name: b.name, code: b.code }));
+};
+
+export const resolveAccountDetails = async (accountNumber, bankCode) => {
+  const resolved = await paystackApi.resolveAccount(accountNumber, bankCode);
+  return {
+    accountName: resolved.account_name,
+    accountNumber: resolved.account_number,
+    bankCode,
+  };
+};

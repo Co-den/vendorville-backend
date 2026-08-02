@@ -112,4 +112,17 @@ export const paystackApi = {
       throw new Error("Failed to verify transaction");
     }
   },
+
+  getBanks: async () => {
+    try {
+      const { data } = await paystack.get("/bank?country=nigeria");
+      return data.data;
+    } catch (error) {
+      logger.error(
+        "Paystack getBanks error",
+        error.response?.data || error.message,
+      );
+      throw new Error("Failed to fetch banks");
+    }
+  },
 };

@@ -89,3 +89,32 @@ export const withdraw = async (req, res, next) => {
     res.status(400).json({ message: error.message || "Withdrawal failed" });
   }
 };
+
+export const getBanks = async (req, res) => {
+  try {
+    const banks = await walletService.getBanks();
+    res.status(200).json({ banks });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch banks" });
+  }
+};
+
+export const resolveAccount = async (req, res) => {
+  try {
+    const { bankCode, accountNumber } = req.body;
+    if (!bankCode || !accountNumber) {
+      return res
+        .status(400)
+        .json({ message: "Bank code and account number are required" });
+    }
+    const result = await walletService.resolveAccountDetails(
+      accountNumber,
+      bankCode,
+    );
+    res.status(200).json(result);
+  } catch (error) {
+    res
+      .status(400)
+      .json({ message: error.message || "Could not resolve this account" });
+  }
+};

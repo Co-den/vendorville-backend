@@ -11,6 +11,7 @@ const __dirname = path.dirname(__filename);
 const transporter = nodemailer.createTransport({
   host: "live.smtp.mailtrap.io",
   port: 587,
+  secure: false,
   auth: {
     user: "api",
     pass: process.env.MAILTRAP_API_TOKEN,
