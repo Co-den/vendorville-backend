@@ -8,7 +8,7 @@ import { users } from "#models/user.js";
 import { notifyOrderEvent } from "#services/notificationService.js";
 import { checkAndNotifyLowStock } from "#services/productService.js";
 import bcrypt from "bcrypt";
-import { and, eq, ilike } from "drizzle-orm";
+import { and, desc, eq, ilike } from "drizzle-orm";
 
 const dayAbbrev = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
