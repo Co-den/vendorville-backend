@@ -28,9 +28,11 @@ export default class Email {
 
   async newTransport() {
     const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
+      host: "Gmail",
       port: 587,
       secure: false,
+      requireTLS: true,
+      family: 4,
       auth: {
         user: process.env.GMAIL_USERNAME,
         pass: process.env.GMAIL_PASSWORD,
