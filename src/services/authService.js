@@ -92,7 +92,7 @@ export const createUser = async ({
 
     // Fire-and-forget don't block the signup response on email sending
     try {
-      await new Email(newUser).sendVerificationCode(verificationCode);
+      new Email(newUser).sendVerificationCode(verificationCode);
     } catch (emailError) {
       logger.error(
         `Signup succeeded but verification email failed for ${newUser.email}`,
@@ -205,7 +205,7 @@ export const resendVerificationCode = async (email) => {
       })
       .where(eq(users.email, email));
 
-    await new Email(user).sendVerificationCode(verificationCode);
+    new Email(user).sendVerificationCode(verificationCode);
 
     logger.info(`Verification code resent to ${user.email}`);
     return { message: "Verification code resent" };
