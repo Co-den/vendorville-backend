@@ -1,8 +1,8 @@
 import { db } from "#config/database.js";
 import logger from "#config/logger.js";
 import { notifications } from "#models/notification.js";
+import Email from "#utils/email.js";
 import { termiiApi } from "#utils/termii.js";
-import { sendGenericEmail } from "#utils/verification.js";
 
 const logNotification = async (
   orderId,
@@ -85,14 +85,10 @@ export const notifyLowStock = async ({
 
   if (vendorEmail) {
     try {
-      await sendGenericEmail(
-        vendorEmail,
-        content.subject,
-        `<div style="font-family: sans-serif; padding: 20px;">
-          <h2>${content.subject}</h2>
-          <p>${content.sms}</p>
-        </div>`,
-      );
+      await new Email({
+        email: vendorEmail,
+        firstName: "Vendor",
+      }).sendNotification(content.subject, content.sms);
       await logNotification(
         null,
         "email",

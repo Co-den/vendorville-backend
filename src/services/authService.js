@@ -1,11 +1,8 @@
 import { db } from "#config/database.js";
 import logger from "#config/logger.js";
 import { users } from "#models/user.js";
-import Email from "#utils/email.js";
-import {
-  generateVerificationCode,
-  sendVerificationEmail,
-} from "#utils/verification.js";
+import Email, { generateVerificationCode } from "#utils/email.js";
+
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { eq } from "drizzle-orm";
@@ -160,18 +157,20 @@ export const verifyEmailCode = async (email, code) => {
         updatedAt: users.updatedAt,
       });
 
+    try {
+      await new Email(updatedUser).sendWelcome();
+    } catch (emailError) {
+      logger.error(`Welcome email failed for ${updatedUser.email}`, emailError);
+    }
+
     logger.info(`User ${updatedUser.email} verified successfully`);
+
     return updatedUser;
   } catch (error) {
     logger.warn(`Email verification failed for ${email}`, {
       error: error.message,
     });
     throw error;
-  }
-  try {
-    await new Email(updatedUser).sendWelcome();
-  } catch (emailError) {
-    logger.error(`Welcome email failed for ${updatedUser.email}`, emailError);
   }
 };
 
@@ -206,7 +205,7 @@ export const resendVerificationCode = async (email) => {
       })
       .where(eq(users.email, email));
 
-    await sendVerificationEmail(user.email, user.firstName, verificationCode);
+    await new Email(user).sendVerificationCode(verificationCode);
 
     logger.info(`Verification code resent to ${user.email}`);
     return { message: "Verification code resent" };
@@ -288,7 +287,7 @@ export const forgotPassword = async (email) => {
     .where(eq(users.email, email))
     .limit(1);
   if (userResult.length === 0) {
-    // Don't reveal whether the email exists — respond success regardless
+    // Don't reveal whether the email exists respond success regardless
     return { message: "If that email exists, a reset link has been sent." };
   }
   const user = userResult[0];
