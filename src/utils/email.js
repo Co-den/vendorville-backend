@@ -28,7 +28,7 @@ export default class Email {
 
   async newTransport() {
     const transporter = nodemailer.createTransport({
-      host: "Gmail",
+      service: "Gmail",
       port: 587,
       secure: false,
       requireTLS: true,
