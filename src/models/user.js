@@ -65,6 +65,9 @@ export const users = pgTable("users", {
 
   verificationCodeExpiresAt: timestamp("verification_code_expires_at"),
 
+  resetPasswordToken: varchar("reset_password_token", { length: 255 }),
+  resetPasswordExpires: timestamp("reset_password_expires"),
+
   createdAt: timestamp("created_at").defaultNow().notNull(),
 
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

@@ -1,11 +1,13 @@
 import { db } from "#config/database.js";
 import logger from "#config/logger.js";
 import { users } from "#models/user.js";
+import Email from "#utils/email.js";
 import {
   generateVerificationCode,
   sendVerificationEmail,
 } from "#utils/verification.js";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 import { eq } from "drizzle-orm";
 
 // Hash the password before saving it to the database
@@ -92,16 +94,14 @@ export const createUser = async ({
       });
 
     // Fire-and-forget don't block the signup response on email sending
-    sendVerificationEmail(newUser.email, newUser.firstName, verificationCode)
-      .then(() => {
-        logger.info(`Verification email sent to ${newUser.email}`);
-      })
-      .catch((emailError) => {
-        logger.error(
-          `Signup succeeded but verification email failed for ${newUser.email}`,
-          emailError,
-        );
-      });
+    try {
+      await new Email(newUser).sendVerificationCode(verificationCode);
+    } catch (emailError) {
+      logger.error(
+        `Signup succeeded but verification email failed for ${newUser.email}`,
+        emailError,
+      );
+    }
 
     logger.info(`User ${newUser.email} created successfully`);
     return newUser;
@@ -167,6 +167,11 @@ export const verifyEmailCode = async (email, code) => {
       error: error.message,
     });
     throw error;
+  }
+  try {
+    await new Email(updatedUser).sendWelcome();
+  } catch (emailError) {
+    logger.error(`Welcome email failed for ${updatedUser.email}`, emailError);
   }
 };
 
@@ -250,21 +255,110 @@ export const verifyCredentials = async (email, password, pin) => {
   }
 };
 
-
 // change password
 export const changePassword = async (userId, currentPassword, newPassword) => {
-  const userResult = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  const userResult = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
   if (userResult.length === 0) throw new Error("User not found");
   const user = userResult[0];
 
   const isValid = await bcrypt.compare(currentPassword, user.password);
   if (!isValid) throw new Error("Current password is incorrect");
 
-  if (newPassword.length < 8) throw new Error("New password must be at least 8 characters");
+  if (newPassword.length < 8)
+    throw new Error("New password must be at least 8 characters");
 
   const hashed = await hashpassword(newPassword);
 
-  await db.update(users).set({ password: hashed, updatedAt: new Date() }).where(eq(users.id, userId));
+  await db
+    .update(users)
+    .set({ password: hashed, updatedAt: new Date() })
+    .where(eq(users.id, userId));
 
   return { message: "Password updated successfully" };
+};
+
+export const forgotPassword = async (email) => {
+  const userResult = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, email))
+    .limit(1);
+  if (userResult.length === 0) {
+    // Don't reveal whether the email exists — respond success regardless
+    return { message: "If that email exists, a reset link has been sent." };
+  }
+  const user = userResult[0];
+
+  const rawToken = crypto.randomBytes(32).toString("hex");
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(rawToken)
+    .digest("hex");
+  const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+  await db
+    .update(users)
+    .set({ resetPasswordToken: hashedToken, resetPasswordExpires: expires })
+    .where(eq(users.id, user.id));
+
+  const resetUrl = `${process.env.FRONTEND_URL}/auth/reset-password/${rawToken}`;
+
+  try {
+    await new Email(user, resetUrl).sendPasswordReset();
+  } catch (error) {
+    // Roll back the token if email fails, so a stale unusable token doesn't linger
+    await db
+      .update(users)
+      .set({ resetPasswordToken: null, resetPasswordExpires: null })
+      .where(eq(users.id, user.id));
+    throw new Error("Could not send reset email. Please try again.");
+  }
+
+  return { message: "If that email exists, a reset link has been sent." };
+};
+
+export const resetPassword = async (rawToken, newPassword) => {
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(rawToken)
+    .digest("hex");
+
+  const userResult = await db
+    .select()
+    .from(users)
+    .where(eq(users.resetPasswordToken, hashedToken))
+    .limit(1);
+  if (userResult.length === 0) {
+    throw new Error("Invalid or expired reset token");
+  }
+  const user = userResult[0];
+
+  if (
+    !user.resetPasswordExpires ||
+    new Date() > new Date(user.resetPasswordExpires)
+  ) {
+    throw new Error("Reset token has expired. Please request a new one.");
+  }
+
+  if (newPassword.length < 8) {
+    throw new Error("New password must be at least 8 characters");
+  }
+
+  const hashedPassword = await hashpassword(newPassword);
+
+  await db
+    .update(users)
+    .set({
+      password: hashedPassword,
+      resetPasswordToken: null,
+      resetPasswordExpires: null,
+      updatedAt: new Date(),
+    })
+    .where(eq(users.id, user.id));
+
+  return { message: "Password reset successfully. You can now log in." };
 };

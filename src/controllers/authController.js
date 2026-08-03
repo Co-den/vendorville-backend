@@ -278,3 +278,27 @@ export const changePassword = async (req, res, next) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+export const forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: "Email is required" });
+    const result = await authService.forgotPassword(email);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+export const resetPassword = async (req, res, next) => {
+  try {
+    const { password } = req.body;
+    const { token } = req.params;
+    if (!password)
+      return res.status(400).json({ message: "New password is required" });
+    const result = await authService.resetPassword(token, password);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
