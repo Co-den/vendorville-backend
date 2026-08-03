@@ -16,32 +16,25 @@ export const generateVerificationCode = () => {
 };
 
 export default class Email {
-  constructor(user, url = null) {
+  constructor(user, url) {
     this.to = user.email;
     this.firstName = user.firstName;
     this.url = url;
-    this.from = `VendorVille <${process.env.GMAIL_USERNAME}>`;
-
+    this.from = process.env.EMAIL_FROM;
     const logoPath = path.join(__dirname, "assets", "vv.png");
     this.logoContent = fs.readFileSync(logoPath).toString("base64");
   }
 
-  async newTransport() {
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
+  newTransport() {
+    return nodemailer.createTransport({
+      host: process.env.BREVO_SMTP_HOST,
+      port: Number(process.env.BREVO_SMTP_PORT),
+      secure: false,
       auth: {
-        user: process.env.GMAIL_USERNAME,
-        pass: process.env.GMAIL_PASSWORD,
+        user: process.env.BREVO_SMTP_LOGIN,
+        pass: process.env.BREVO_SMTP_PASSWORD,
       },
-      logger: true,
-      debug: true,
     });
-
-    await transporter.verify();
-
-    return transporter;
   }
 
   wrapper(bodyHtml) {
