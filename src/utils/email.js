@@ -26,7 +26,7 @@ export default class Email {
     this.logoContent = fs.readFileSync(logoPath).toString("base64");
   }
 
-  newTransport() {
+  async newTransport() {
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 587,
@@ -38,6 +38,10 @@ export default class Email {
       logger: true,
       debug: true,
     });
+
+    await transporter.verify();
+
+    return transporter;
   }
 
   wrapper(bodyHtml) {
@@ -158,22 +162,14 @@ export default class Email {
       subject,
       html,
       text: htmlToText(html),
-
-      attachments: [
-        {
-          filename: "vv.png",
-          content: this.logoContent,
-          encoding: "base64",
-          cid: "vv-logo",
-        },
-      ],
     };
 
     try {
-      await this.newTransport().sendMail(mailOptions);
-      logger.info(`${template} email sent to ${this.to}`);
+      const transporter = await this.newTransport().sendMail(mailOptions);
+
+      logger.info(`Email (${template}) sent to ${this.to}`);
     } catch (error) {
-      logger.error(`Failed to send ${template} email to ${this.to}`, error);
+      logger.error(`Error sending ${template} email to ${this.to}`, error);
       throw error;
     }
   }

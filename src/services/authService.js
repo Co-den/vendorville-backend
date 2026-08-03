@@ -92,7 +92,7 @@ export const createUser = async ({
 
     // Fire-and-forget don't block the signup response on email sending
     try {
-      new Email(newUser).sendVerificationCode(verificationCode);
+      await new Email(newUser).sendVerificationCode(verificationCode);
     } catch (emailError) {
       logger.error(
         `Signup succeeded but verification email failed for ${newUser.email}`,
