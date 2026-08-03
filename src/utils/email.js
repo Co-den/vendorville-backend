@@ -115,7 +115,7 @@ export default class Email {
             </p>
 
             <div style="text-align:center; margin:30px 0;">
-              <a
+              
                 href="${this.url}"
                 style="
                   background:#132e1b;
@@ -141,6 +141,15 @@ export default class Email {
           `),
         };
 
+      case "custom":
+        return {
+          subject: extra.subject,
+          html: this.wrapper(`
+            <h3>${extra.subject}</h3>
+            <p>${extra.message}</p>
+          `),
+        };
+
       default:
         throw new Error(`Unknown email template: ${template}`);
     }
@@ -155,11 +164,18 @@ export default class Email {
       subject,
       html,
       text: htmlToText(html),
+      attachments: [
+        {
+          filename: "vv.png",
+          content: this.logoContent,
+          encoding: "base64",
+          cid: "vv-logo",
+        },
+      ],
     };
 
     try {
-      const transporter = await this.newTransport().sendMail(mailOptions);
-
+      await this.newTransport().sendMail(mailOptions);
       logger.info(`Email (${template}) sent to ${this.to}`);
     } catch (error) {
       logger.error(`Error sending ${template} email to ${this.to}`, error);
@@ -178,13 +194,8 @@ export default class Email {
   async sendPasswordReset() {
     return this.send("passwordReset");
   }
+
   async sendNotification(subject, message) {
-    return this.sendCustom(
-      subject,
-      this.wrapper(`
-      <h3>${subject}</h3>
-      <p>${message}</p>
-    `),
-    );
+    return this.send("custom", { subject, message });
   }
 }
