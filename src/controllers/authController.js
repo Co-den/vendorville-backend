@@ -302,3 +302,18 @@ export const resetPassword = async (req, res, next) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+export const checkAccountType = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const vendorExists = await authService.emailExists(email);
+    if (vendorExists) return res.status(200).json({ type: "vendor" });
+
+    const staffExists = await staffService.emailExistsAsStaff(email);
+    if (staffExists) return res.status(200).json({ type: "staff" });
+
+    return res.status(200).json({ type: "unknown" });
+  } catch (error) {
+    res.status(500).json({ message: "Error checking account" });
+  }
+};

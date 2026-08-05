@@ -93,3 +93,14 @@ export const aiLimiter = rateLimit({
     message: "Too many AI requests. Please wait a moment and try again.",
   },
 });
+
+// Dashboard CRUD operations generous since real usage can be bursty (bulk inventory edits, POS during rush)
+export const dashboardWriteLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  limit: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    message: "Too many requests. Please slow down.",
+  },
+});

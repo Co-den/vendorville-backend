@@ -139,3 +139,12 @@ export const loginStaff = async (email, password) => {
     businessName: bizResult[0]?.name,
   };
 };
+
+export const emailExistsAsStaff = async (email) => {
+  const result = await db
+    .select()
+    .from(staffMembers)
+    .where(eq(staffMembers.email, email))
+    .limit(1);
+  return result.length > 0;
+};

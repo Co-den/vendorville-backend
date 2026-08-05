@@ -1,21 +1,26 @@
 import * as orderController from "#controllers/orderController.js";
+import { dashboardWriteLimiter } from "#src/middlewares/rateLimiters.js";
 //import authMiddleware from "#middlewares/authMiddleware.js";
 import {
   flexibleAuth,
   restrictToOwnBusiness,
 } from "#middlewares/flexibleAuth.js";
-import securityMiddleware from "#middlewares/security.js";
+//import securityMiddleware from "#middlewares/security.js";
 import express from "express";
 
 const router = express.Router({ mergeParams: true });
 //router.use(authMiddleware);
 router.use(flexibleAuth);
 router.use(restrictToOwnBusiness);
-router.use(securityMiddleware);
+//router.use(securityMiddleware);
 
 router.get("/", orderController.getOrders);
-router.post("/", orderController.createOrder);
-router.patch("/:orderId/status", orderController.updateOrderStatus);
-router.delete("/:orderId", orderController.deleteOrder);
+router.post("/", dashboardWriteLimiter, orderController.createOrder);
+router.patch(
+  "/:orderId/status",
+  dashboardWriteLimiter,
+  orderController.updateOrderStatus,
+);
+router.delete("/:orderId", dashboardWriteLimiter, orderController.deleteOrder);
 
 export default router;

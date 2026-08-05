@@ -363,3 +363,12 @@ export const resetPassword = async (rawToken, newPassword) => {
 
   return { message: "Password reset successfully. You can now log in." };
 };
+
+export const emailExists = async (email) => {
+  const result = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, email))
+    .limit(1);
+  return result.length > 0;
+};
