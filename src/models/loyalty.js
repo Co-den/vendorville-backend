@@ -2,6 +2,7 @@
 import { businesses } from "#models/business.js";
 import { customerAccounts } from "#models/customerAccount.js";
 import {
+  boolean,
   integer,
   pgTable,
   serial,
