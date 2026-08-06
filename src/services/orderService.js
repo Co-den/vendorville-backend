@@ -4,6 +4,7 @@ import { businesses } from "#models/business.js";
 import { orderItems, orders } from "#models/order.js";
 import { products } from "#models/product.js";
 import { users } from "#models/user.js";
+import { awardPointsForOrder } from "#services/loyaltyService.js";
 import { notifyOrderEvent } from "#services/notificationService.js";
 import { checkAndNotifyLowStock } from "#services/productService.js";
 import { and, desc, eq } from "drizzle-orm";
@@ -168,7 +169,11 @@ export const createOrder = async (userId, businessId, data) => {
       logger.error("Low stock check error", err),
     );
   }
-
+  awardPointsForOrder(
+    businessId,
+    data.customerAccountId || null,
+    newOrder.totalAmount,
+  ).catch((err) => logger.error("Loyalty points error", err));
   logger.info(`Order ${orderNumber} created for business ${businessId}`);
 
   return {

@@ -5,6 +5,11 @@ import { customerAccounts } from "#models/customerAccount.js";
 import { orderItems, orders } from "#models/order.js";
 import { products } from "#models/product.js";
 import { users } from "#models/user.js";
+import {
+  awardPointsForOrder,
+  redeemGiftCard,
+  redeemPointsForDiscount,
+} from "#services/loyaltyService.js";
 import { notifyOrderEvent } from "#services/notificationService.js";
 import { checkAndNotifyLowStock } from "#services/productService.js";
 import bcrypt from "bcrypt";
@@ -129,6 +134,28 @@ export const createGuestOrder = async (
   const orderNumber = generateOrderNumber();
   const paystackReference = `store_${orderNumber}`;
 
+  let discountKobo = 0;
+
+  if (data.redeemPoints && customerAccountId) {
+    const redemption = await redeemPointsForDiscount(
+      business.id,
+      customerAccountId,
+      data.redeemPoints,
+    );
+    discountKobo += redemption.discountKobo;
+  }
+
+  if (data.giftCardCode) {
+    const giftRedemption = await redeemGiftCard(
+      business.id,
+      data.giftCardCode,
+      totalAmount + deliveryFee - discountKobo,
+    );
+    discountKobo += giftRedemption.appliedKobo;
+  }
+
+  const finalTotal = Math.max(0, totalAmount + deliveryFee - discountKobo);
+
   const newOrder = await db.transaction(async (tx) => {
     const [createdOrder] = await tx
       .insert(orders)
@@ -197,7 +224,11 @@ export const createGuestOrder = async (
       logger.error("Low stock check error", err),
     );
   }
-
+  awardPointsForOrder(
+    business.id,
+    customerAccountId,
+    newOrder.totalAmount,
+  ).catch((err) => logger.error("Loyalty points error", err));
   return {
     ...newOrder,
     totalAmount: newOrder.totalAmount / 100,

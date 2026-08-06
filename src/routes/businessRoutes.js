@@ -1,4 +1,5 @@
 import * as businessController from "#controllers/businessController.js";
+import * as loyaltyController from "#controllers/loyaltyController.js";
 import * as staffController from "#controllers/staffController.js";
 //import authMiddleware from "#middlewares/authMiddleware.js";
 import { aiLimiter } from "#src/middlewares/rateLimiters.js";
@@ -80,4 +81,16 @@ router.post(
   businessController.parseAiOrder,
 );
 
+router.post(
+  "/:id/gift-cards",
+  ownerOnly,
+  restrictToOwnBusiness,
+  loyaltyController.issueGiftCard,
+);
+router.get(
+  "/:id/gift-cards",
+  ownerOnly,
+  restrictToOwnBusiness,
+  loyaltyController.getGiftCards,
+);
 export default router;

@@ -1,3 +1,4 @@
+import * as loyaltyController from "#controllers/loyaltyController.js";
 import * as storefrontController from "#controllers/storefrontController.js";
 import { customerAuth } from "#middlewares/customerAuth.js";
 import { softCustomerAuth } from "#middlewares/softCustomerAuth.js";
@@ -47,4 +48,7 @@ router.get(
   customerAuth,
   storefrontController.getCustomerOrders,
 );
+
+router.get("/:slug/my-points", customerAuth, loyaltyController.getMyPoints);
+router.post("/:slug/gift-card/validate", loyaltyController.validateGiftCard);
 export default router;
