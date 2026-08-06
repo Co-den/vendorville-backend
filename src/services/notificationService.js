@@ -50,6 +50,10 @@ const templates = {
       ? `${business.name}: "${product.name}" (SKU: ${product.sku}) is now OUT OF STOCK. Restock soon to avoid missed sales.`
       : `${business.name}: "${product.name}" (SKU: ${product.sku}) is running low — only ${product.stock} left. Consider restocking.`,
   }),
+  order_dispatched_customer: (order, businessName) => ({
+    subject: `Order Out for Delivery — ${order.orderNumber}`,
+    sms: `Hi ${order.customerName}, your order ${order.orderNumber} from ${businessName} is out for delivery!`,
+  }),
 };
 
 export const notifyLowStock = async ({

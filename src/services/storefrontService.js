@@ -4,6 +4,7 @@ import { businesses, businessImages } from "#models/business.js";
 import { customerAccounts } from "#models/customerAccount.js";
 import { orderItems, orders } from "#models/order.js";
 import { products } from "#models/product.js";
+import { subscriptions } from "#models/subscription.js";
 import { users } from "#models/user.js";
 import {
   awardPointsForOrder,
@@ -12,8 +13,9 @@ import {
 } from "#services/loyaltyService.js";
 import { notifyOrderEvent } from "#services/notificationService.js";
 import { checkAndNotifyLowStock } from "#services/productService.js";
+import { getReviewStats } from "#services/reviewService.js";
 import bcrypt from "bcrypt";
-import { and, desc, eq, ilike } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
 const dayAbbrev = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -358,7 +360,7 @@ export const getCustomerById = async (id) => {
   return safe;
 };
 
-export const getDirectory = async ({ search, category }) => {
+/*export const getDirectory = async ({ search, category }) => {
   const conditions = [eq(businesses.visibility, "public")];
 
   if (search) {
@@ -376,4 +378,73 @@ export const getDirectory = async ({ search, category }) => {
     .orderBy(businesses.name);
 
   return result;
+};
+
+*/
+
+export const getDirectory = async ({ search, category } = {}) => {
+  const results = await db
+    .select({
+      id: businesses.id,
+      name: businesses.name,
+      shortName: businesses.shortName,
+      slug: businesses.slug,
+      logoUrl: businesses.logoUrl,
+      description: businesses.description,
+      address: businesses.address,
+      isAvailable: businesses.isAvailable,
+      availableDays: businesses.availableDays,
+      userId: businesses.userId,
+    })
+    .from(businesses)
+    .where(eq(businesses.visibility, "public"));
+
+  const dayAbbrev = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const today = dayAbbrev[new Date().getDay()];
+
+  const enriched = await Promise.all(
+    results.map(async (biz) => {
+      const productList = await db
+        .select()
+        .from(products)
+        .where(eq(products.businessId, biz.id));
+      const categories = [...new Set(productList.map((p) => p.category))];
+      const stats = await getReviewStats(biz.id);
+
+      const subResult = await db
+        .select()
+        .from(subscriptions)
+        .where(eq(subscriptions.userId, biz.userId))
+        .limit(1);
+      const plan = subResult[0]?.plan || "starter";
+
+      const isOpenToday = biz.isAvailable && biz.availableDays.includes(today);
+
+      return {
+        ...biz,
+        productCount: productList.length,
+        categories,
+        avgRating: stats.avgRating,
+        reviewCount: stats.total,
+        plan,
+        isOpenToday,
+      };
+    }),
+  );
+
+  let filtered = enriched.filter((b) => b.productCount > 0);
+
+  if (search) {
+    const s = search.toLowerCase();
+    filtered = filtered.filter(
+      (b) =>
+        b.name.toLowerCase().includes(s) ||
+        b.description?.toLowerCase().includes(s),
+    );
+  }
+  if (category && category !== "All") {
+    filtered = filtered.filter((b) => b.categories.includes(category));
+  }
+
+  return filtered;
 };

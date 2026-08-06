@@ -15,6 +15,13 @@
       "when": 1785767636437,
       "tag": "0001_tired_wind_dancer",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1786045622993,
+      "tag": "0002_bouncy_gideon",
+      "breakpoints": true
     }
   ]
 }

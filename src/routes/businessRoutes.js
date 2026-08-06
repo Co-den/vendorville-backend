@@ -1,4 +1,5 @@
 import * as businessController from "#controllers/businessController.js";
+import * as dispatchController from "#controllers/dispatchController.js";
 import * as loyaltyController from "#controllers/loyaltyController.js";
 import * as staffController from "#controllers/staffController.js";
 //import authMiddleware from "#middlewares/authMiddleware.js";
@@ -93,4 +94,43 @@ router.get(
   restrictToOwnBusiness,
   loyaltyController.getGiftCards,
 );
+
+router.get(
+  "/:id/riders",
+  ownerOnly,
+  restrictToOwnBusiness,
+  dispatchController.getRiders,
+);
+router.post(
+  "/:id/riders",
+  ownerOnly,
+  restrictToOwnBusiness,
+  dispatchController.addRider,
+);
+router.delete(
+  "/:id/riders/:riderId",
+  ownerOnly,
+  restrictToOwnBusiness,
+  dispatchController.removeRider,
+);
+router.patch(
+  "/:id/riders/:riderId/active",
+  ownerOnly,
+  restrictToOwnBusiness,
+  dispatchController.toggleRiderActive,
+);
+
+router.post(
+  "/:id/orders/:orderId/assign-rider",
+  managerOrOwner,
+  restrictToOwnBusiness,
+  dispatchController.assignRider,
+);
+router.patch(
+  "/:id/orders/:orderId/dispatch-status",
+  managerOrOwner,
+  restrictToOwnBusiness,
+  dispatchController.updateDispatchStatus,
+);
+
 export default router;
