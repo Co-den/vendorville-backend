@@ -1,5 +1,6 @@
 import logger from "#config/logger.js";
 import { apiLimiter } from "#middlewares/rateLimiters.js";
+import adminRoutes from "#routes/adminRoutes.js";
 import authRoutes from "#routes/authRoutes.js";
 import businessRoutes from "#routes/businessRoutes.js";
 import customerRoutes from "#routes/customerRoutes.js";
@@ -95,6 +96,7 @@ app.use("/api/businesses/:businessId/customers", customerRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/store", storefrontRoutes);
 app.use("/api/staff-auth", staffAuthRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.use("/nonexsistent", (req, res) => {
   res.status(404).json({ error: "Route not found" });

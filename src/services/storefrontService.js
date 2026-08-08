@@ -15,7 +15,7 @@ import { notifyOrderEvent } from "#services/notificationService.js";
 import { checkAndNotifyLowStock } from "#services/productService.js";
 import { getReviewStats } from "#services/reviewService.js";
 import bcrypt from "bcrypt";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 
 const dayAbbrev = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -25,9 +25,14 @@ export const getStorefront = async (slug) => {
     .from(businesses)
     .where(eq(businesses.slug, slug))
     .limit(1);
-  if (bizResult.length === 0 || bizResult[0].visibility !== "public") {
+  if (
+    bizResult.length === 0 ||
+    bizResult[0].visibility !== "public" ||
+    bizResult[0].verificationStatus !== "approved"
+  ) {
     throw new Error("Store not found");
   }
+
   const biz = bizResult[0];
 
   const productList = await db
@@ -397,7 +402,12 @@ export const getDirectory = async ({ search, category } = {}) => {
       userId: businesses.userId,
     })
     .from(businesses)
-    .where(eq(businesses.visibility, "public"));
+    .where(
+      and(
+        eq(businesses.visibility, "public"),
+        eq(businesses.verificationStatus, "approved"),
+      ),
+    );
 
   const dayAbbrev = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const today = dayAbbrev[new Date().getDay()];

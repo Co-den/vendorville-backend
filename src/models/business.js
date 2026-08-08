@@ -42,6 +42,11 @@ export const businesses = pgTable("businesses", {
     .array()
     .notNull()
     .default(sql`ARRAY['Mon','Tue','Wed','Thu','Fri','Sat']`),
+
+  verificationStatus: varchar("verification_status", { length: 20 })
+    .notNull()
+    .default("pending"),
+  rejectionReason: text("rejection_reason"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
