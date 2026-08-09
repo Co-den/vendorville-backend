@@ -9,6 +9,7 @@ import {
   signup,
   verifyEmail,
 } from "#controllers/authController.js";
+import * as chatController from "#controllers/chatController.js";
 import authMiddleware from "#src/middlewares/authMiddleware.js";
 import {
   authLimiter,
@@ -29,5 +30,8 @@ router.get("/check-auth", authMiddleware, checkAuth);
 router.post("/logout", logout);
 router.post("/forgot-password", authMiddleware, forgotPassword);
 router.post("/reset-password/:token", authMiddleware, resetPassword);
+
+router.get("/chat", authMiddleware, chatController.getMyThread);
+router.post("/chat", authMiddleware, chatController.sendVendorMessage);
 
 export default router;

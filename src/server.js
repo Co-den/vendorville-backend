@@ -1,7 +1,12 @@
+import logger from "#config/logger.js";
+import { initSocket } from "#config/socket.js";
+import http from "http";
 import app from "./app.js";
 
-const PORT = process.env.PORT || 5000;
+const server = http.createServer(app);
+initSocket(server);
 
-app.listen(PORT, () => {
-  console.log(`Listening on http://localhost:${PORT}`);
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
+  logger.info(`Listening on http://localhost:${PORT}`);
 });
