@@ -218,6 +218,22 @@ export const getEnhancedStats = async () => {
     .map(([state, count]) => ({ state, count }))
     .sort((a, b) => b.count - a.count);
 
+  const allOrders = await db.select().from(orders);
+  const salesByBusiness = {};
+  allOrders
+    .filter((o) => o.status !== "cancelled")
+    .forEach((o) => {
+      salesByBusiness[o.businessId] =
+        (salesByBusiness[o.businessId] || 0) + o.totalAmount;
+    });
+
+  const topBusinessId = Object.entries(salesByBusiness).sort(
+    (a, b) => b[1] - a[1],
+  )[0]?.[0];
+  const topBusiness = topBusinessId
+    ? allBusinesses.find((b) => b.id === Number(topBusinessId))
+    : null;
+  const topState = locationData[0]?.state || "N/A";
   return {
     total: allBusinesses.length,
     pending: allBusinesses.filter((b) => b.verificationStatus === "pending")
@@ -230,5 +246,12 @@ export const getEnhancedStats = async () => {
     planBusinessCounts,
     totalSubscriptionRevenue: totalSubscriptionRevenue,
     locationData,
+    topSellingVendor: topBusiness
+      ? {
+          name: topBusiness.name,
+          totalSales: (salesByBusiness[topBusiness.id] || 0) / 100,
+        }
+      : null,
+    topVendorState: topState,
   };
 };
