@@ -39,12 +39,16 @@ const authMiddleware = (req, res, next) => {
       id: decoded.id,
       email: decoded.email,
       role: decoded.role,
+      firstName: decoded.firstName,
+      timeZone: decoded.timeZone,
     };
 
     logger.debug("User authenticated", {
       userId: decoded.id,
       email: decoded.email,
       role: decoded.role,
+      firstName: decoded.firstName,
+      timeZone: decoded.timeZone,
     });
 
     next();
