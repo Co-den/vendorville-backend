@@ -400,6 +400,7 @@ export const getDirectory = async ({ search, category } = {}) => {
       isAvailable: businesses.isAvailable,
       availableDays: businesses.availableDays,
       userId: businesses.userId,
+      isVerified: businesses.verificationStatus,
     })
     .from(businesses)
     .where(
@@ -438,6 +439,7 @@ export const getDirectory = async ({ search, category } = {}) => {
         reviewCount: stats.total,
         plan,
         isOpenToday,
+        isVerified: biz.isVerified,
       };
     }),
   );
