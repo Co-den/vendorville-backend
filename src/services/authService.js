@@ -92,10 +92,23 @@ export const createUser = async ({
 
     // Fire-and-forget don't block the signup response on email sending
     try {
-      new Email(newUser)
-        .sendVerificationCode(verificationCode)
-        .catch((err) => logger.error("Verification email failed", err));
+      console.log("========== EMAIL DEBUG ==========");
+      console.log("About to send verification email");
+      console.log("Recipient:", newUser.email);
+      console.log("SMTP host:", process.env.BREVO_SMTP_HOST);
+      console.log("SMTP port:", process.env.BREVO_SMTP_PORT);
+      console.log("SMTP login exists:", !!process.env.BREVO_SMTP_LOGIN);
+      console.log("SMTP password exists:", !!process.env.BREVO_SMTP_PASSWORD);
+      console.log("EMAIL_FROM:", process.env.EMAIL_FROM);
+
+      await new Email(newUser).sendVerificationCode(verificationCode);
+
+      console.log("Verification email sent successfully");
+      console.log("================================");
     } catch (emailError) {
+      console.error("VERIFICATION EMAIL FAILED:");
+      console.error(emailError);
+
       logger.error(
         `Signup succeeded but verification email failed for ${newUser.email}`,
         emailError,
