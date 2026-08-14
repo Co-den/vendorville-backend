@@ -4,6 +4,7 @@ import { businesses } from "#models/business.js";
 import { orders } from "#models/order.js";
 import { orderDispatch, riders } from "#models/rider.js";
 import { notifyOrderEvent } from "#services/notificationService.js";
+import { sendPushToUser } from "#services/pushService.js";
 import { getSubscription } from "#services/subscriptionService.js";
 import { and, eq } from "drizzle-orm";
 
@@ -137,6 +138,13 @@ export const assignRiderToOrder = async (
     riderName: riderResult[0].name,
     riderPhone: riderResult[0].phone,
   };
+  if (event === "order_placed" && business.userId) {
+    sendPushToUser(business.userId, "vendor", {
+      title: "New Order Received",
+      body: `${order.customerName} placed an order for ₦${order.totalAmount.toLocaleString()}`,
+      url: "/dashboard/orders",
+    }).catch((err) => logger.error("Push notification error", err));
+  }
 };
 
 export const updateDispatchStatus = async (

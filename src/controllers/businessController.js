@@ -1,6 +1,7 @@
 import logger from "#config/logger.js";
 import * as aiOrderService from "#services/aiOrderService.js";
 import * as businessService from "#services/businessService.js";
+import * as exportService from "#services/exportService.js";
 import * as reviewService from "#services/reviewService.js";
 
 export const parseAiOrder = async (req, res) => {
@@ -105,6 +106,26 @@ export const replyToReview = async (req, res) => {
       req.body.reply,
     );
     res.status(200).json({ review });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+export const exportOrdersCsv = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    const csv = await exportService.generateOrdersCsv(
+      req.user.id,
+      req.params.id,
+      startDate,
+      endDate,
+    );
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="orders-export.csv"`,
+    );
+    res.status(200).send(csv);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

@@ -36,6 +36,13 @@
       "when": 1786266291840,
       "tag": "0004_whole_ezekiel_stane",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1786570154367,
+      "tag": "0005_slim_terror",
+      "breakpoints": true
     }
   ]
 }

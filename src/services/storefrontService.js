@@ -460,3 +460,47 @@ export const getDirectory = async ({ search, category } = {}) => {
 
   return filtered;
 };
+
+export const trackOrder = async (orderNumber, phone) => {
+  const orderResult = await db
+    .select()
+    .from(orders)
+    .where(eq(orders.orderNumber, orderNumber))
+    .limit(1);
+  if (orderResult.length === 0) throw new Error("Order not found");
+  const order = orderResult[0];
+
+  const normalizedInput = phone.replace(/\D/g, "").slice(-10);
+  const normalizedOnFile = (order.customerPhone || "")
+    .replace(/\D/g, "")
+    .slice(-10);
+  if (normalizedInput !== normalizedOnFile) {
+    throw new Error("Phone number does not match this order");
+  }
+
+  const items = await db
+    .select()
+    .from(orderItems)
+    .where(eq(orderItems.orderId, order.id));
+  const bizResult = await db
+    .select()
+    .from(businesses)
+    .where(eq(businesses.id, order.businessId))
+    .limit(1);
+  const dispatch = await getOrderDispatch(order.businessId, order.id).catch(
+    () => null,
+  );
+
+  return {
+    orderNumber: order.orderNumber,
+    status: order.status,
+    totalAmount: order.totalAmount / 100,
+    deliveryFee: order.deliveryFee / 100,
+    deliveryAddress: order.deliveryAddress,
+    createdAt: order.createdAt,
+    businessName: bizResult[0]?.name,
+    businessSlug: bizResult[0]?.slug,
+    items: items.map((i) => ({ ...i, unitPrice: i.unitPrice / 100 })),
+    dispatch,
+  };
+};

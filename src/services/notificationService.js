@@ -1,6 +1,7 @@
 import { db } from "#config/database.js";
 import logger from "#config/logger.js";
 import { notifications } from "#models/notification.js";
+import { sendPushToUser } from "#services/pushService.js";
 import Email from "#utils/email.js";
 import { termiiApi } from "#utils/termii.js";
 
@@ -127,7 +128,6 @@ export const notifyOrderEvent = async ({
     "order_cancelled_customer",
   ].includes(`${event}_customer`);
 
-  // ----- Customer notification -----
   const customerTemplateKey = `${event}_customer`;
   if (templates[customerTemplateKey] && order.customerPhone) {
     const content = templates[customerTemplateKey](order, business.name);
@@ -152,7 +152,6 @@ export const notifyOrderEvent = async ({
     }
   }
 
-  // ----- Vendor notification (only on new order) -----
   const vendorTemplateKey = `${event}_vendor`;
   if (templates[vendorTemplateKey] && vendorPhone) {
     const content = templates[vendorTemplateKey](order);
@@ -169,5 +168,13 @@ export const notifyOrderEvent = async ({
         error.message,
       );
     }
+  }
+
+  if (event === "order_placed" && business.userId) {
+    sendPushToUser(business.userId, "vendor", {
+      title: "New Order Received",
+      body: `${order.customerName} placed an order for ₦${order.totalAmount.toLocaleString()}`,
+      url: "/dashboard/orders",
+    }).catch((err) => logger.error("Push notification error", err));
   }
 };

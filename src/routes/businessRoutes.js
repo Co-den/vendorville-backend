@@ -60,7 +60,6 @@ router.patch(
   businessController.updateAvailability,
 );
 
-// Reviews owner or manager can reply
 router.get(
   "/:id/reviews",
   restrictToOwnBusiness,
@@ -73,7 +72,6 @@ router.post(
   businessController.replyToReview,
 );
 
-// AI order entry enterprise + owner only (staff shouldn't trigger billing-adjacent AI calls)
 router.post(
   "/:id/ai-order",
   ownerOnly,
@@ -133,4 +131,10 @@ router.patch(
   dispatchController.updateDispatchStatus,
 );
 
+router.get(
+  "/:id/export/orders",
+  ownerOnly,
+  restrictToOwnBusiness,
+  businessController.exportOrdersCsv,
+);
 export default router;

@@ -186,3 +186,13 @@ export const getCustomerOrders = async (req, res) => {
     res.status(500).json({ message: "Error loading orders" });
   }
 };
+
+export const trackOrder = async (req, res) => {
+  try {
+    const { orderNumber, phone } = req.body;
+    const order = await storefrontService.trackOrder(orderNumber, phone);
+    res.status(200).json({ order });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};

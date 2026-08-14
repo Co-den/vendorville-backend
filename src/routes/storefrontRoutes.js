@@ -51,4 +51,7 @@ router.get(
 
 router.get("/:slug/my-points", customerAuth, loyaltyController.getMyPoints);
 router.post("/:slug/gift-card/validate", loyaltyController.validateGiftCard);
+
+router.post("/track-order", storefrontController.trackOrder);
+
 export default router;
