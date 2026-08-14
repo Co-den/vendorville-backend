@@ -1,0 +1,1 @@
+ALTER TABLE "businesses" ADD COLUMN "currency" varchar(3) DEFAULT 'NGN' NOT NULL;

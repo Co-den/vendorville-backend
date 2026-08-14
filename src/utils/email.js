@@ -36,7 +36,16 @@ export default class Email {
       },
     });
   }
+  async verifyEmailConnection() {
+    try {
+      await this.newTransport().verify();
 
+      logger.info("Brevo SMTP connection successful");
+    } catch (error) {
+      logger.error("Brevo SMTP connection failed", error);
+      throw error;
+    }
+  }
   wrapper(bodyHtml) {
     return `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; color: #333;">
@@ -116,7 +125,7 @@ export default class Email {
 
             <div style="text-align:center; margin:30px 0;">
               
-                href="${this.url}"
+               <a href="${this.url}"
                 style="
                   background:#132e1b;
                   color:#fff;
