@@ -199,9 +199,12 @@ export const updateOrderStatus = async (
   const orderResult = await db
     .select()
     .from(orders)
-    .where(eq(orders.id, orderId))
+    .where(eq(orders.id, Number(orderId)))
     .limit(1);
-  if (orderResult.length === 0 || orderResult[0].businessId !== businessId) {
+  if (
+    orderResult.length === 0 ||
+    orderResult[0].businessId !== Number(businessId)
+  ) {
     throw new Error("Order not found");
   }
 
