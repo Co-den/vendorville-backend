@@ -72,16 +72,220 @@ export default class Email {
     switch (template) {
       case "welcome":
         return {
-          subject: "Welcome to VendorVille!",
+          subject: "Welcome to VendorVille! 🚀",
           html: this.wrapper(`
-            <p>
-              Thanks for joining VendorVille — the platform built for Nigerian vendors to manage inventory, orders and payments in one place.
-            </p>
+      <div style="text-align:center; padding:10px 0 25px;">
+        <div style="
+          display:inline-block;
+          background:#eaf6ed;
+          color:#132e1b;
+          padding:8px 16px;
+          border-radius:20px;
+          font-size:12px;
+          font-weight:bold;
+          letter-spacing:1px;
+          margin-bottom:18px;
+        ">
+          WELCOME TO VENDORVILLE
+        </div>
 
-            <p>
-              Your account is ready. We can't wait to see you grow your business with us.
-            </p>
-          `),
+        <h1 style="
+          font-size:30px;
+          line-height:1.3;
+          color:#132e1b;
+          margin:0 0 18px;
+        ">
+          Your business journey starts here 🚀
+        </h1>
+
+        <p style="
+          font-size:16px;
+          line-height:1.7;
+          color:#666;
+          margin:0;
+        ">
+          We're excited to officially welcome you to VendorVille,
+          a platform built to help Nigerian vendors manage their
+          businesses with more ease, clarity and confidence.
+        </p>
+      </div>
+
+      <div style="
+        background:#f6f8f6;
+        border-radius:12px;
+        padding:25px;
+        margin:25px 0;
+      ">
+        <h2 style="
+          color:#132e1b;
+          font-size:21px;
+          margin-top:0;
+        ">
+          Everything you need, all in one place.
+        </h2>
+
+        <p style="
+          font-size:15px;
+          line-height:1.7;
+          color:#555;
+        ">
+          Running a business comes with a lot of moving parts. From
+          keeping track of products and inventory to managing orders,
+          sales and customers, staying organized can quickly become
+          overwhelming.
+        </p>
+
+        <p style="
+          font-size:15px;
+          line-height:1.7;
+          color:#555;
+          margin-bottom:0;
+        ">
+          VendorVille is designed to bring those important parts of
+          your business together in one place, giving you a clearer
+          view of your operations and helping you spend more time
+          focusing on growing your business.
+        </p>
+      </div>
+
+      <h2 style="
+        color:#132e1b;
+        font-size:22px;
+        margin:30px 0 20px;
+      ">
+        Here's what you can do with VendorVille
+      </h2>
+
+      <div style="margin-bottom:25px;">
+        <h3 style="
+          color:#132e1b;
+          font-size:17px;
+          margin-bottom:8px;
+        ">
+          📦 Manage your inventory
+        </h3>
+
+        <p style="
+          font-size:15px;
+          line-height:1.7;
+          color:#666;
+          margin-top:0;
+        ">
+          Keep track of your products and stay informed about what
+          is available in your business, helping you stay organized
+          and prepared.
+        </p>
+      </div>
+
+      <div style="margin-bottom:25px;">
+        <h3 style="
+          color:#132e1b;
+          font-size:17px;
+          margin-bottom:8px;
+        ">
+          🛒 Manage orders and sales
+        </h3>
+
+        <p style="
+          font-size:15px;
+          line-height:1.7;
+          color:#666;
+          margin-top:0;
+        ">
+          Stay on top of your business activity and manage important
+          information from one central place without the stress of
+          jumping between different tools.
+        </p>
+      </div>
+
+      <div style="margin-bottom:30px;">
+        <h3 style="
+          color:#132e1b;
+          font-size:17px;
+          margin-bottom:8px;
+        ">
+          📈 Grow with confidence
+        </h3>
+
+        <p style="
+          font-size:15px;
+          line-height:1.7;
+          color:#666;
+          margin-top:0;
+        ">
+          Get a clearer understanding of your business and make better
+          decisions as you continue to build, improve and grow.
+        </p>
+      </div>
+
+      <div style="
+        border-top:1px solid #e5e5e5;
+        padding-top:30px;
+        text-align:center;
+      ">
+        <h2 style="
+          color:#132e1b;
+          font-size:23px;
+          margin-top:0;
+        ">
+          Ready to get started?
+        </h2>
+
+        <p style="
+          font-size:15px;
+          line-height:1.7;
+          color:#666;
+          margin-bottom:25px;
+        ">
+          Your VendorVille account is now ready. Start exploring the
+          platform, set up your business and begin managing your
+          operations in a smarter way.
+        </p>
+
+        <a
+          href="${process.env.FRONTEND_URL}/dashboard"
+          style="
+            display:inline-block;
+            background:#132e1b;
+            color:#ffffff;
+            text-decoration:none;
+            padding:15px 30px;
+            border-radius:8px;
+            font-size:15px;
+            font-weight:bold;
+          "
+        >
+          Go to VendorVille →
+        </a>
+      </div>
+
+      <div style="
+        margin-top:35px;
+        padding:25px;
+        background:#fff8e8;
+        border-radius:12px;
+      ">
+        <p style="
+          font-size:15px;
+          line-height:1.7;
+          color:#555;
+          margin:0;
+        ">
+          We're excited to have you with us and can't wait to see what
+          you build. VendorVille is here to support your journey and
+          help make managing your business simpler.
+        </p>
+      </div>
+
+      <p style="
+        font-size:16px;
+        line-height:1.7;
+        color:#333;
+        margin-top:35px;
+      ">
+        Welcome to VendorVille, ${this.firstName}. We're glad you're here. 🚀
+      </p>
+    `),
         };
 
       case "verification":
