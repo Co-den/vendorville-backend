@@ -51,6 +51,10 @@ export const getOrders = async (userId, businessId) => {
   return withItems;
 };
 
+const generatePaystackReference = () => {
+  return `VV_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+};
+
 export const createOrder = async (userId, businessId, data) => {
   await assertBusinessOwnership(userId, businessId);
 
@@ -102,6 +106,7 @@ export const createOrder = async (userId, businessId, data) => {
   }
 
   const orderNumber = generateOrderNumber();
+  const paystackReference = generatePaystackReference();
 
   const newOrder = await db.transaction(async (tx) => {
     const [createdOrder] = await tx
@@ -116,6 +121,7 @@ export const createOrder = async (userId, businessId, data) => {
         paymentMethod: paymentMethod || "cash",
         status: "pending",
         notes: notes || null,
+        paystackReference,
       })
       .returning();
 
