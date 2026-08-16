@@ -35,10 +35,32 @@ app.use(
   },
   webhookRoutes,
 );
-// then later, your normal:
+
 app.use(express.json());
 
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "https://js.paystack.co", "'unsafe-inline'"],
+        frameSrc: [
+          "'self'",
+          "https://checkout.paystack.com",
+          "https://js.paystack.co",
+        ],
+        connectSrc: [
+          "'self'",
+          "https://api.paystack.co",
+          "https://checkout.paystack.com",
+        ],
+        imgSrc: ["'self'", "data:", "https:"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+      },
+    },
+  }),
+);
+
 app.use(express.json());
 const allowedOrigins = [
   "http://localhost:3000",
