@@ -65,9 +65,9 @@ export const createOrder = async (userId, businessId, data) => {
     paymentMethod,
     notes,
     items,
+    deliveryAddress,
     deliveryFee = 0,
   } = data;
-
   if (!items || items.length === 0) {
     throw new Error("Order must include at least one item");
   }
@@ -105,7 +105,9 @@ export const createOrder = async (userId, businessId, data) => {
       unitPrice: product.price,
     });
   }
-  totalAmount += Number(deliveryFee) * 100;
+  const deliveryFeeKobo = Math.round(Number(deliveryFee) * 100);
+  const totalAmount = subtotal + deliveryFeeKobo;
+
   const orderNumber = generateOrderNumber();
   const paystackReference = generatePaystackReference();
 
@@ -118,8 +120,10 @@ export const createOrder = async (userId, businessId, data) => {
         customerName,
         customerPhone: customerPhone || null,
         customerEmail: customerEmail || null,
+        deliveryAddress: deliveryAddress || null,
         totalAmount,
         paymentMethod: paymentMethod || "cash",
+        deliveryFee: deliveryFeeKobo,
         status: "pending",
         notes: notes || null,
         paystackReference,
@@ -185,8 +189,13 @@ export const createOrder = async (userId, businessId, data) => {
 
   return {
     ...newOrder,
+    subtotal: (newOrder.totalAmount - Number(deliveryFee) * 100) / 100,
+    deliveryFee: Number(deliveryFee),
     totalAmount: newOrder.totalAmount / 100,
-    items: resolvedItems.map((i) => ({ ...i, unitPrice: i.unitPrice / 100 })),
+    items: resolvedItems.map((i) => ({
+      ...i,
+      unitPrice: i.unitPrice / 100,
+    })),
   };
 };
 
