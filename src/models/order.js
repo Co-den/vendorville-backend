@@ -14,21 +14,18 @@ export const orders = pgTable("orders", {
   businessId: integer("business_id")
     .notNull()
     .references(() => businesses.id),
-
   orderNumber: varchar("order_number", { length: 30 }).notNull().unique(),
   customerName: varchar("customer_name", { length: 150 }).notNull(),
   customerPhone: varchar("customer_phone", { length: 20 }),
   customerEmail: varchar("customer_email", { length: 255 }),
-
   totalAmount: integer("total_amount").notNull(),
   paymentMethod: varchar("payment_method", { length: 20 })
     .notNull()
     .default("cash"),
   status: varchar("status", { length: 20 }).notNull().default("pending"),
-
   notes: text("notes"),
-
   deliveryAddress: text("delivery_address"),
+  deliveryZoneId: integer("delivery_zone_id"),
   deliveryFee: integer("delivery_fee").notNull().default(0),
   source: varchar("source", { length: 20 }).notNull().default("pos"),
   paystackReference: varchar("paystack_reference", { length: 100 }),

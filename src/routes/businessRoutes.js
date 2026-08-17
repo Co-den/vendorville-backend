@@ -1,8 +1,8 @@
 import * as businessController from "#controllers/businessController.js";
+import * as deliveryZoneController from "#controllers/deliveryZoneController.js";
 import * as dispatchController from "#controllers/dispatchController.js";
 import * as loyaltyController from "#controllers/loyaltyController.js";
 import * as staffController from "#controllers/staffController.js";
-//import authMiddleware from "#middlewares/authMiddleware.js";
 import { aiLimiter } from "#src/middlewares/rateLimiters.js";
 
 import {
@@ -11,14 +11,11 @@ import {
   ownerOnly,
   restrictToOwnBusiness,
 } from "#middlewares/flexibleAuth.js";
-//import securityMiddleware from "#middlewares/security.js";
 import { upload } from "#middlewares/upload.js";
 import express from "express";
 
 const router = express.Router();
-//router.use(authMiddleware);
 router.use(flexibleAuth);
-//router.use(securityMiddleware);
 
 router.get("/", ownerOnly, businessController.getBusinesses);
 router.get(
@@ -136,5 +133,30 @@ router.get(
   ownerOnly,
   restrictToOwnBusiness,
   businessController.exportOrdersCsv,
+);
+
+router.get(
+  "/:id/delivery-zones",
+  ownerOnly,
+  restrictToOwnBusiness,
+  deliveryZoneController.getZones,
+);
+router.post(
+  "/:id/delivery-zones",
+  ownerOnly,
+  restrictToOwnBusiness,
+  deliveryZoneController.addZone,
+);
+router.patch(
+  "/:id/delivery-zones/:zoneId",
+  ownerOnly,
+  restrictToOwnBusiness,
+  deliveryZoneController.updateZone,
+);
+router.delete(
+  "/:id/delivery-zones/:zoneId",
+  ownerOnly,
+  restrictToOwnBusiness,
+  deliveryZoneController.deleteZone,
 );
 export default router;

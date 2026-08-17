@@ -60,3 +60,15 @@ export const businessImages = pgTable("business_images", {
   imageUrl: text("image_url").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const deliveryZones = pgTable("delivery_zones", {
+  id: serial("id").primaryKey(),
+  businessId: integer("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 150 }).notNull(),
+  fee: integer("fee").notNull(),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});

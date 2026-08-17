@@ -6,11 +6,7 @@ import { orderItems, orders } from "#models/order.js";
 import { products } from "#models/product.js";
 import { subscriptions } from "#models/subscription.js";
 import { users } from "#models/user.js";
-import {
-  awardPointsForOrder,
-  redeemGiftCard,
-  redeemPointsForDiscount,
-} from "#services/loyaltyService.js";
+import { getZones, resolveZoneFee } from "#services/deliveryZoneService.js";
 import { notifyOrderEvent } from "#services/notificationService.js";
 import { checkAndNotifyLowStock } from "#services/productService.js";
 import { getReviewStats } from "#services/reviewService.js";
@@ -46,6 +42,7 @@ export const getStorefront = async (slug) => {
 
   const today = dayAbbrev[new Date().getDay()];
   const isOpenToday = biz.isAvailable && biz.availableDays.includes(today);
+  const zones = await getZones(biz.id);
 
   return {
     business: {
@@ -67,6 +64,7 @@ export const getStorefront = async (slug) => {
     products: productList
       .filter((p) => p.stock > 0)
       .map((p) => ({ ...p, price: p.price / 100 })),
+    deliveryZones: zones,
   };
 };
 
@@ -93,6 +91,7 @@ export const createGuestOrder = async (
     customerPhone,
     customerEmail,
     deliveryAddress,
+    deliveryZoneId,
     paymentMethod,
     items,
   } = data;
@@ -102,6 +101,9 @@ export const createGuestOrder = async (
   if (!customerName || !customerPhone)
     throw new Error("Name and phone are required");
   if (!deliveryAddress) throw new Error("Delivery address is required");
+
+  const { deliveryZoneId: resolvedZoneId, feeKobo: deliveryFee } =
+    await resolveZoneFee(business.id, deliveryZoneId);
 
   let totalAmount = 0;
   const resolvedItems = [];
@@ -119,13 +121,11 @@ export const createGuestOrder = async (
       throw new Error(`Product not found: ${item.productId}`);
     }
     const product = productResult[0];
-
     if (product.stock < item.quantity) {
       throw new Error(
         `"${product.name}" only has ${product.stock} left in stock`,
       );
     }
-
     totalAmount += product.price * item.quantity;
     resolvedItems.push({
       productId: product.id,
@@ -135,33 +135,8 @@ export const createGuestOrder = async (
     });
   }
 
-  const deliveryFee = data.deliveryFee
-    ? Math.round(Number(data.deliveryFee) * 100)
-    : 0;
   const orderNumber = generateOrderNumber();
   const paystackReference = `store_${orderNumber}`;
-
-  let discountKobo = 0;
-
-  if (data.redeemPoints && customerAccountId) {
-    const redemption = await redeemPointsForDiscount(
-      business.id,
-      customerAccountId,
-      data.redeemPoints,
-    );
-    discountKobo += redemption.discountKobo;
-  }
-
-  if (data.giftCardCode) {
-    const giftRedemption = await redeemGiftCard(
-      business.id,
-      data.giftCardCode,
-      totalAmount + deliveryFee - discountKobo,
-    );
-    discountKobo += giftRedemption.appliedKobo;
-  }
-
-  const finalTotal = Math.max(0, totalAmount + deliveryFee - discountKobo);
 
   const newOrder = await db.transaction(async (tx) => {
     const [createdOrder] = await tx
@@ -176,6 +151,7 @@ export const createGuestOrder = async (
         totalAmount: totalAmount + deliveryFee,
         deliveryAddress,
         deliveryFee,
+        deliveryZoneId: resolvedZoneId,
         paymentMethod,
         status: "pending",
         source: "storefront",
@@ -207,14 +183,11 @@ export const createGuestOrder = async (
     return createdOrder;
   });
 
-  // Everything below runs AFTER the transaction has committed
-
   const vendorResult = await db
     .select()
     .from(users)
     .where(eq(users.id, business.userId))
     .limit(1);
-
   notifyOrderEvent({
     event: "order_placed",
     order: {
@@ -231,11 +204,7 @@ export const createGuestOrder = async (
       logger.error("Low stock check error", err),
     );
   }
-  awardPointsForOrder(
-    business.id,
-    customerAccountId,
-    newOrder.totalAmount,
-  ).catch((err) => logger.error("Loyalty points error", err));
+
   return {
     ...newOrder,
     totalAmount: newOrder.totalAmount / 100,
