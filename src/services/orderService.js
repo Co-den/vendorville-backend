@@ -72,7 +72,7 @@ export const createOrder = async (userId, businessId, data) => {
     throw new Error("Order must include at least one item");
   }
 
-  let totalAmount = 0;
+  let subtotal = 0;
   const resolvedItems = [];
 
   for (const item of items) {
@@ -96,7 +96,7 @@ export const createOrder = async (userId, businessId, data) => {
     }
 
     const lineTotal = product.price * item.quantity;
-    totalAmount += lineTotal;
+    subtotal += lineTotal;
 
     resolvedItems.push({
       productId: product.id,
