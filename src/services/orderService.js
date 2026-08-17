@@ -65,6 +65,7 @@ export const createOrder = async (userId, businessId, data) => {
     paymentMethod,
     notes,
     items,
+    deliveryFee = 0,
   } = data;
 
   if (!items || items.length === 0) {
@@ -104,7 +105,7 @@ export const createOrder = async (userId, businessId, data) => {
       unitPrice: product.price,
     });
   }
-
+  totalAmount += Number(deliveryFee) * 100;
   const orderNumber = generateOrderNumber();
   const paystackReference = generatePaystackReference();
 

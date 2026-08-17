@@ -20,7 +20,7 @@ export const orders = pgTable("orders", {
   customerPhone: varchar("customer_phone", { length: 20 }),
   customerEmail: varchar("customer_email", { length: 255 }),
 
-  totalAmount: integer("total_amount").notNull(), // kobo
+  totalAmount: integer("total_amount").notNull(),
   paymentMethod: varchar("payment_method", { length: 20 })
     .notNull()
     .default("cash"),
