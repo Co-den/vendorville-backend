@@ -81,9 +81,12 @@ export const assignRiderToOrder = async (
   const orderResult = await db
     .select()
     .from(orders)
-    .where(eq(orders.id, orderId))
+    .where(eq(orders.id, Number(orderId)))
     .limit(1);
-  if (orderResult.length === 0 || orderResult[0].businessId !== businessId) {
+  if (
+    orderResult.length === 0 ||
+    orderResult[0].businessId !== Number(businessId)
+  ) {
     throw new Error("Order not found");
   }
   const order = orderResult[0];
@@ -91,11 +94,17 @@ export const assignRiderToOrder = async (
   const riderResult = await db
     .select()
     .from(riders)
-    .where(eq(riders.id, riderId))
+    .where(eq(riders.id, Number(riderId)))
     .limit(1);
-  if (riderResult.length === 0 || riderResult[0].businessId !== businessId) {
+  if (
+    riderResult.length === 0 ||
+    riderResult[0].businessId !== Number(businessId)
+  ) {
     throw new Error("Rider not found");
   }
+  const rider = riderResult[0];
+  if (!rider.isActive) throw new Error("This rider is currently inactive");
+
   const rider = riderResult[0];
   if (!rider.isActive) throw new Error("This rider is currently inactive");
 
