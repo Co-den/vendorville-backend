@@ -22,7 +22,7 @@ const assertBusinessOwnership = async (userId, businessId) => {
 
 const assertDispatchAccess = async (userId) => {
   const sub = await getSubscription(userId);
-  if (sub.plan !== "enterprise") {
+  if (sub.plan !== "starter" && sub.plan !== "enterprise") {
     throw new Error("Dispatch rider management requires the Enterprise plan.");
   }
 };
