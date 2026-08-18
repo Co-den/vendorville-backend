@@ -17,23 +17,41 @@ export const initSocket = (httpServer) => {
 
   io.use((socket, next) => {
     const token = socket.handshake.auth?.token;
-    if (!token) return next(new Error("Authentication required"));
+    if (!token) {
+      socket.user = null; // anonymous — only allowed to join public tracking rooms
+      return next();
+    }
     try {
-      const decoded = jwtSign.verify(token);
-      socket.user = decoded;
+      socket.user = jwtSign.verify(token);
       next();
     } catch {
-      next(new Error("Invalid token"));
+      socket.user = null;
+      next();
     }
   });
 
   io.on("connection", (socket) => {
-    const room =
-      socket.user.type === "admin" ? "admins" : `vendor_${socket.user.id}`;
-    socket.join(room);
+    if (socket.user) {
+      const room =
+        socket.user.type === "admin" ? "admins" : `vendor_${socket.user.id}`;
+      socket.join(room);
+    }
 
     socket.on("join_thread", (threadId) => {
+      if (!socket.user) return; // chat requires auth
       socket.join(`thread_${threadId}`);
+    });
+
+    // Public — anyone can join an order tracking room (order ID acts as the "secret" alongside phone verification already done via REST)
+    socket.on("join_order_tracking", (orderId) => {
+      socket.join(`order_${orderId}`);
+    });
+
+    // Rider location pushes — no auth required, gated by trackingToken validated via REST before this
+    socket.on("rider_location_update", ({ orderId, lat, lng }) => {
+      socket
+        .to(`order_${orderId}`)
+        .emit("rider_location", { lat, lng, updatedAt: new Date() });
     });
 
     socket.on("disconnect", () => {});

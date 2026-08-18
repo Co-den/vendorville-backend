@@ -22,5 +22,11 @@ router.patch(
   orderController.updateOrderStatus,
 );
 router.delete("/:orderId", dashboardWriteLimiter, orderController.deleteOrder);
+router.post(
+  "/:orderId/confirm",
+  dashboardWriteLimiter,
+  orderController.confirmOrder,
+);
+router.get("/notifications", orderController.getNotifications);
 
 export default router;

@@ -51,3 +51,28 @@ export const deleteOrder = async (req, res, next) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+export const confirmOrder = async (req, res) => {
+  try {
+    const result = await orderService.confirmOrder(
+      req.user.id,
+      req.params.businessId,
+      req.params.orderId,
+    );
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+export const getNotifications = async (req, res) => {
+  try {
+    const notifications = await orderService.getVendorNotifications(
+      req.user.id,
+      req.params.businessId,
+    );
+    res.status(200).json({ notifications });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};

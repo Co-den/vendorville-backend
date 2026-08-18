@@ -52,7 +52,7 @@ export const bankAccounts = pgTable("bank_accounts", {
   bankName: varchar("bank_name", { length: 100 }).notNull(),
   accountNumber: varchar("account_number", { length: 20 }).notNull(),
   accountName: varchar("account_name", { length: 150 }).notNull(),
-  recipientCode: varchar("recipient_code", { length: 100 }).notNull(), // Paystack transfer recipient code
+  recipientCode: varchar("recipient_code", { length: 100 }).notNull(),
   isPrimary: boolean("is_primary").notNull().default(false),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),

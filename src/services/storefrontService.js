@@ -470,6 +470,15 @@ export const trackOrder = async (orderNumber, phone) => {
     businessName: bizResult[0]?.name,
     businessSlug: bizResult[0]?.slug,
     items: items.map((i) => ({ ...i, unitPrice: i.unitPrice / 100 })),
-    dispatch,
+    dispatch: dispatch
+      ? {
+          riderName: dispatch.riderName,
+          riderPhone: dispatch.riderPhone,
+          status: dispatch.status,
+          currentLat: dispatch.currentLat ? Number(dispatch.currentLat) : null,
+          currentLng: dispatch.currentLng ? Number(dispatch.currentLng) : null,
+        }
+      : null,
+    orderId: order.id,
   };
 };

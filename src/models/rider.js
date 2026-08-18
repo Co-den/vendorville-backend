@@ -31,8 +31,11 @@ export const orderDispatch = pgTable("order_dispatch", {
   riderId: integer("rider_id")
     .notNull()
     .references(() => riders.id),
-
   status: varchar("status", { length: 20 }).notNull().default("assigned"),
+  trackingToken: varchar("tracking_token", { length: 64 }).notNull().unique(),
+  currentLat: varchar("current_lat", { length: 20 }),
+  currentLng: varchar("current_lng", { length: 20 }),
+  locationUpdatedAt: timestamp("location_updated_at"),
   assignedAt: timestamp("assigned_at").defaultNow().notNull(),
   pickedUpAt: timestamp("picked_up_at"),
   deliveredAt: timestamp("delivered_at"),

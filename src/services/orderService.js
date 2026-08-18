@@ -4,9 +4,11 @@ import { businesses } from "#models/business.js";
 import { orderItems, orders } from "#models/order.js";
 import { products } from "#models/product.js";
 import { users } from "#models/user.js";
+import { bankAccounts } from "#models/wallet.js";
 import { awardPointsForOrder } from "#services/loyaltyService.js";
 import { notifyOrderEvent } from "#services/notificationService.js";
 import { checkAndNotifyLowStock } from "#services/productService.js";
+import { termiiApi } from "#utils/termii.js";
 import { and, desc, eq } from "drizzle-orm";
 
 const assertBusinessOwnership = async (userId, businessId) => {
@@ -302,4 +304,92 @@ export const deleteOrder = async (userId, businessId, orderId) => {
   await db
     .delete(orders)
     .where(and(eq(orders.id, orderId), eq(orders.businessId, businessId)));
+};
+
+export const confirmOrder = async (userId, businessId, orderId) => {
+  await assertBusinessOwnership(userId, businessId);
+
+  const orderResult = await db
+    .select()
+    .from(orders)
+    .where(eq(orders.id, orderId))
+    .limit(1);
+  if (orderResult.length === 0 || orderResult[0].businessId !== businessId) {
+    throw new Error("Order not found");
+  }
+  const order = orderResult[0];
+
+  if (order.paymentMethod === "paystack" && order.status !== "paid") {
+    throw new Error("This order's payment has not been verified yet");
+  }
+
+  await db
+    .update(orders)
+    .set({ confirmedAt: new Date() })
+    .where(eq(orders.id, orderId));
+
+  const bizResult = await db
+    .select()
+    .from(businesses)
+    .where(eq(businesses.id, businessId))
+    .limit(1);
+  const business = bizResult[0];
+
+  if (order.paymentMethod === "pay_on_delivery") {
+    const vendorAccountResult = await db
+      .select()
+      .from(bankAccounts)
+      .where(
+        and(
+          eq(bankAccounts.userId, business.userId),
+          eq(bankAccounts.isPrimary, true),
+        ),
+      )
+      .limit(1);
+    const account = vendorAccountResult[0];
+
+    const smsBody = account
+      ? `Your order ${order.orderNumber} from ${business.name} is confirmed! Pay ₦${(order.totalAmount / 100).toLocaleString()} on delivery, or transfer to ${account.bankName} ${account.accountNumber} (${account.accountName}).`
+      : `Your order ${order.orderNumber} from ${business.name} is confirmed! Please pay ₦${(order.totalAmount / 100).toLocaleString()} on delivery.`;
+
+    if (order.customerPhone) {
+      termiiApi
+        .sendSms(order.customerPhone, smsBody)
+        .catch((err) => logger.error("Confirm SMS error", err));
+    }
+  } else {
+    if (order.customerPhone) {
+      termiiApi
+        .sendSms(
+          order.customerPhone,
+          `Your order ${order.orderNumber} from ${business.name} is confirmed and being prepared!`,
+        )
+        .catch((err) => logger.error("Confirm SMS error", err));
+    }
+  }
+
+  return { message: "Order confirmed" };
+};
+
+// Notification bell feed pending orders needing confirmation + low stock alerts
+export const getVendorNotifications = async (userId, businessId) => {
+  await assertBusinessOwnership(userId, businessId);
+
+  const pendingOrders = await db
+    .select()
+    .from(orders)
+    .where(and(eq(orders.businessId, businessId), isNull(orders.confirmedAt)))
+    .orderBy(desc(orders.createdAt))
+    .limit(20);
+
+  const notifications = pendingOrders.map((o) => ({
+    id: `order_${o.id}`,
+    type: "order",
+    orderId: o.id,
+    title: "New order awaiting confirmation",
+    message: `${o.customerName} — ₦${(o.totalAmount / 100).toLocaleString()} (${o.paymentMethod})`,
+    createdAt: o.createdAt,
+  }));
+
+  return notifications;
 };

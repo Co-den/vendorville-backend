@@ -32,6 +32,7 @@ export const orders = pgTable("orders", {
   customerAccountId: integer("customer_account_id").references(
     () => customerAccounts.id,
   ),
+  confirmedAt: timestamp("confirmed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

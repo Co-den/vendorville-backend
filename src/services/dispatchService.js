@@ -1,11 +1,13 @@
 import { db } from "#config/database.js";
 import logger from "#config/logger.js";
+import { getIo } from "#config/socket.js";
 import { businesses } from "#models/business.js";
 import { orders } from "#models/order.js";
 import { orderDispatch, riders } from "#models/rider.js";
 import { notifyOrderEvent } from "#services/notificationService.js";
-import { sendPushToUser } from "#services/pushService.js";
 import { getSubscription } from "#services/subscriptionService.js";
+import { termiiApi } from "#utils/termii.js";
+import crypto from "crypto";
 import { and, eq } from "drizzle-orm";
 
 const assertBusinessOwnership = async (userId, businessId) => {
@@ -84,6 +86,7 @@ export const assignRiderToOrder = async (
   if (orderResult.length === 0 || orderResult[0].businessId !== businessId) {
     throw new Error("Order not found");
   }
+  const order = orderResult[0];
 
   const riderResult = await db
     .select()
@@ -93,8 +96,10 @@ export const assignRiderToOrder = async (
   if (riderResult.length === 0 || riderResult[0].businessId !== businessId) {
     throw new Error("Rider not found");
   }
-  if (!riderResult[0].isActive)
-    throw new Error("This rider is currently inactive");
+  const rider = riderResult[0];
+  if (!rider.isActive) throw new Error("This rider is currently inactive");
+
+  const trackingToken = crypto.randomBytes(16).toString("hex");
 
   const existing = await db
     .select()
@@ -106,7 +111,7 @@ export const assignRiderToOrder = async (
   if (existing.length === 0) {
     [dispatch] = await db
       .insert(orderDispatch)
-      .values({ orderId, riderId, status: "assigned" })
+      .values({ orderId, riderId, status: "assigned", trackingToken })
       .returning();
   } else {
     [dispatch] = await db
@@ -114,9 +119,12 @@ export const assignRiderToOrder = async (
       .set({
         riderId,
         status: "assigned",
+        trackingToken,
         assignedAt: new Date(),
         pickedUpAt: null,
         deliveredAt: null,
+        currentLat: null,
+        currentLng: null,
       })
       .where(eq(orderDispatch.orderId, orderId))
       .returning();
@@ -127,24 +135,93 @@ export const assignRiderToOrder = async (
     .from(businesses)
     .where(eq(businesses.id, businessId))
     .limit(1);
+  const business = bizResult[0];
+
+  // SMS the rider with pickup/delivery details + their unique tracking link
+  const riderLink = `${process.env.FRONTEND_URL}/rider/track/${trackingToken}`;
+  termiiApi
+    .sendSms(
+      rider.phone,
+      `New delivery: Pick up order ${order.orderNumber} from ${business.name} (${business.address}). Deliver to: ${order.deliveryAddress}. Start sharing your location: ${riderLink}`,
+    )
+    .catch((err) => logger.error("Rider SMS error", err));
+
   notifyOrderEvent({
     event: "order_dispatched",
-    order: { ...orderResult[0], totalAmount: orderResult[0].totalAmount / 100 },
-    business: bizResult[0],
+    order: { ...order, totalAmount: order.totalAmount / 100 },
+    business,
   }).catch((err) => logger.error("Dispatch notification error", err));
 
+  return { ...dispatch, riderName: rider.name, riderPhone: rider.phone };
+};
+
+// Public — validates a rider's tracking token, returns order info for the rider's page
+export const getDispatchByToken = async (token) => {
+  const result = await db
+    .select()
+    .from(orderDispatch)
+    .where(eq(orderDispatch.trackingToken, token))
+    .limit(1);
+  if (result.length === 0) throw new Error("Invalid tracking link");
+  const dispatch = result[0];
+
+  const orderResult = await db
+    .select()
+    .from(orders)
+    .where(eq(orders.id, dispatch.orderId))
+    .limit(1);
+  const order = orderResult[0];
+
+  const riderResult = await db
+    .select()
+    .from(riders)
+    .where(eq(riders.id, dispatch.riderId))
+    .limit(1);
+  const bizResult = await db
+    .select()
+    .from(businesses)
+    .where(eq(businesses.id, order.businessId))
+    .limit(1);
+
   return {
-    ...dispatch,
-    riderName: riderResult[0].name,
-    riderPhone: riderResult[0].phone,
+    orderNumber: order.orderNumber,
+    customerName: order.customerName,
+    deliveryAddress: order.deliveryAddress,
+    pickupAddress: bizResult[0]?.address,
+    pickupBusinessName: bizResult[0]?.name,
+    riderName: riderResult[0]?.name,
+    status: dispatch.status,
   };
-  if (event === "order_placed" && business.userId) {
-    sendPushToUser(business.userId, "vendor", {
-      title: "New Order Received",
-      body: `${order.customerName} placed an order for ₦${order.totalAmount.toLocaleString()}`,
-      url: "/dashboard/orders",
-    }).catch((err) => logger.error("Push notification error", err));
+};
+
+export const updateRiderLocation = async (token, lat, lng) => {
+  const result = await db
+    .select()
+    .from(orderDispatch)
+    .where(eq(orderDispatch.trackingToken, token))
+    .limit(1);
+  if (result.length === 0) throw new Error("Invalid tracking link");
+  const dispatch = result[0];
+
+  await db
+    .update(orderDispatch)
+    .set({
+      currentLat: String(lat),
+      currentLng: String(lng),
+      locationUpdatedAt: new Date(),
+    })
+    .where(eq(orderDispatch.id, dispatch.id));
+
+  const io = getIo();
+  if (io) {
+    io.to(`order_${dispatch.orderId}`).emit("rider_location", {
+      lat,
+      lng,
+      updatedAt: new Date(),
+    });
   }
+
+  return { message: "Location updated" };
 };
 
 export const updateDispatchStatus = async (
@@ -196,6 +273,8 @@ export const getOrderDispatch = async (businessId, orderId) => {
       deliveredAt: orderDispatch.deliveredAt,
       riderName: riders.name,
       riderPhone: riders.phone,
+      currentLat: orderDispatch.currentLat,
+      currentLng: orderDispatch.currentLng,
     })
     .from(orderDispatch)
     .innerJoin(riders, eq(orderDispatch.riderId, riders.id))

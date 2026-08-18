@@ -76,3 +76,26 @@ export const updateDispatchStatus = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+export const getDispatchByToken = async (req, res) => {
+  try {
+    const data = await dispatchService.getDispatchByToken(req.params.token);
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+};
+
+export const updateRiderLocation = async (req, res) => {
+  try {
+    const { lat, lng } = req.body;
+    const result = await dispatchService.updateRiderLocation(
+      req.params.token,
+      lat,
+      lng,
+    );
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
