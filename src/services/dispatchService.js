@@ -105,9 +105,6 @@ export const assignRiderToOrder = async (
   const rider = riderResult[0];
   if (!rider.isActive) throw new Error("This rider is currently inactive");
 
-  const rider = riderResult[0];
-  if (!rider.isActive) throw new Error("This rider is currently inactive");
-
   const trackingToken = crypto.randomBytes(16).toString("hex");
 
   const existing = await db
