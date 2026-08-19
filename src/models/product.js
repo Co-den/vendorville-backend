@@ -20,7 +20,7 @@ export const products = pgTable("products", {
   category: varchar("category", { length: 100 }).notNull(),
   imageUrl: text("image_url"),
 
-  price: integer("price").notNull(), // stored in kobo
+  price: integer("price").notNull(),
   stock: integer("stock").notNull().default(0),
   lowStockThreshold: integer("low_stock_threshold").notNull().default(10),
 

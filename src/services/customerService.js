@@ -15,7 +15,6 @@ const assertBusinessOwnership = async (userId, businessId) => {
   }
 };
 
-// Customers are derived from order history, enriched with any saved notes
 export const getCustomers = async (userId, businessId) => {
   await assertBusinessOwnership(userId, businessId);
 
