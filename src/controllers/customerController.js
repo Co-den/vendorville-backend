@@ -1,29 +1,55 @@
 import * as customerService from "#services/customerService.js";
 
-export const getCustomers = async (req, res, next) => {
+export const getCustomers = async (req, res) => {
   try {
-    const list = await customerService.getCustomers(
-      req.user.id,
-      req.params.businessId,
-    );
-    res.status(200).json({ customers: list });
+    const businessId = Number(req.params.businessId);
+
+    if (!Number.isInteger(businessId)) {
+      return res.status(400).json({
+        message: "Invalid business ID",
+      });
+    }
+
+    const list = await customerService.getCustomers(req.user.id, businessId);
+
+    res.status(200).json({
+      customers: list,
+    });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error("GET CUSTOMERS ERROR:", error);
+
+    res.status(400).json({
+      message: error.message,
+    });
   }
 };
 
-export const saveNote = async (req, res, next) => {
+export const saveNote = async (req, res) => {
   try {
+    const businessId = Number(req.params.businessId);
+
+    if (!Number.isInteger(businessId)) {
+      return res.status(400).json({
+        message: "Invalid business ID",
+      });
+    }
+
     const { phone, name, notes } = req.body;
+
     const result = await customerService.saveCustomerNote(
       req.user.id,
-      req.params.businessId,
+      businessId,
       phone,
       name,
       notes,
     );
+
     res.status(200).json(result);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error("SAVE CUSTOMER NOTE ERROR:", error);
+
+    res.status(400).json({
+      message: error.message,
+    });
   }
 };
