@@ -2,7 +2,7 @@ import { db } from "#config/database.js";
 import { businesses } from "#models/business.js";
 import { customerAccounts } from "#models/customerAccount.js";
 import { orders } from "#models/order.js";
-import { desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 
 const assertBusinessOwnership = async (userId, businessId) => {
   const result = await db
@@ -63,8 +63,13 @@ export const saveCustomerNote = async (
   const existing = await db
     .select()
     .from(customerAccounts)
-    .where(eq(customerAccounts.businessId, businessId))
-    .then((rows) => rows.find((r) => r.phone === phone));
+    .where(
+      and(
+        eq(customerAccounts.businessId, businessId),
+        eq(customerAccounts.phone, phone),
+      ),
+    )
+    .limit(1);
 
   if (existing) {
     await db

@@ -71,6 +71,13 @@
       "when": 1787177480471,
       "tag": "0009_overrated_slipstream",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1787178780639,
+      "tag": "0010_magical_the_anarchist",
+      "breakpoints": true
     }
   ]
 }
