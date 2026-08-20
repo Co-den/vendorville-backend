@@ -8,7 +8,7 @@ import { bankAccounts } from "#models/wallet.js";
 import { awardPointsForOrder } from "#services/loyaltyService.js";
 import { notifyOrderEvent } from "#services/notificationService.js";
 import { checkAndNotifyLowStock } from "#services/productService.js";
-import { termiiApi } from "#utils/termii.js";
+import { kudismsApi } from "#utils/kudisms.js";
 import { and, desc, eq } from "drizzle-orm";
 
 const assertBusinessOwnership = async (userId, businessId) => {
@@ -357,13 +357,13 @@ export const confirmOrder = async (userId, businessId, orderId) => {
       : `Your order ${order.orderNumber} from ${business.name} is confirmed! Please pay ₦${(order.totalAmount / 100).toLocaleString()} on delivery.`;
 
     if (order.customerPhone) {
-      termiiApi
+      kudismsApi
         .sendSms(order.customerPhone, smsBody)
         .catch((err) => logger.error("Confirm SMS error", err));
     }
   } else {
     if (order.customerPhone) {
-      termiiApi
+      kudismsApi
         .sendSms(
           order.customerPhone,
           `Your order ${order.orderNumber} from ${business.name} is confirmed and being prepared!`,

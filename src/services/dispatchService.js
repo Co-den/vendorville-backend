@@ -6,7 +6,7 @@ import { orders } from "#models/order.js";
 import { orderDispatch, riders } from "#models/rider.js";
 import { notifyOrderEvent } from "#services/notificationService.js";
 import { getSubscription } from "#services/subscriptionService.js";
-import { termiiApi } from "#utils/termii.js";
+import { kudismsApi } from "#utils/kudisms.js";
 import crypto from "crypto";
 import { and, eq } from "drizzle-orm";
 
@@ -145,7 +145,7 @@ export const assignRiderToOrder = async (
 
   // SMS the rider with pickup/delivery details + their unique tracking link
   const riderLink = `${process.env.FRONTEND_URL}/rider/track/${trackingToken}`;
-  termiiApi
+  kudismsApi
     .sendSms(
       rider.phone,
       `New delivery: Pick up order ${order.orderNumber} from ${business.name} (${business.address}). Deliver to: ${order.deliveryAddress}. Start sharing your location: ${riderLink}`,

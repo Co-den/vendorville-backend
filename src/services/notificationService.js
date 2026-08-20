@@ -3,7 +3,7 @@ import logger from "#config/logger.js";
 import { notifications } from "#models/notification.js";
 import { sendPushToUser } from "#services/pushService.js";
 import Email from "#utils/email.js";
-import { termiiApi } from "#utils/termii.js";
+import { kudismsApi } from "#utils/kudisms.js";
 
 const logNotification = async (
   orderId,
@@ -68,7 +68,7 @@ export const notifyLowStock = async ({
 
   if (vendorPhone) {
     try {
-      await termiiApi.sendSms(vendorPhone, content.sms);
+      await kudismsApi.sendSms(vendorPhone, content.sms);
       await logNotification(
         null,
         "sms",
@@ -132,7 +132,7 @@ export const notifyOrderEvent = async ({
   if (templates[customerTemplateKey] && order.customerPhone) {
     const content = templates[customerTemplateKey](order, business.name);
     try {
-      await termiiApi.sendSms(order.customerPhone, content.sms);
+      await kudismsApi.sendSms(order.customerPhone, content.sms);
       await logNotification(
         order.id,
         "sms",
@@ -156,7 +156,7 @@ export const notifyOrderEvent = async ({
   if (templates[vendorTemplateKey] && vendorPhone) {
     const content = templates[vendorTemplateKey](order);
     try {
-      await termiiApi.sendSms(vendorPhone, content.sms);
+      await kudismsApi.sendSms(vendorPhone, content.sms);
       await logNotification(order.id, "sms", vendorPhone, event, "sent");
     } catch (error) {
       await logNotification(
