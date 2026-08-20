@@ -1,27 +1,27 @@
 import logger from "#config/logger.js";
 import axios from "axios";
 
-const KUDISMS_API_KEY = process.env.KUDISMS_API_KEY;
-const KUDISMS_SENDER_ID = process.env.KUDISMS_SENDER_ID || "vendorville";
+const KUDISMS_TOKEN = process.env.KUDISMS_API_TOKEN;
+const KUDISMS_SENDER_ID = process.env.KUDISMS_SENDER_ID || "VendorVille";
 
 const kudisms = axios.create({
   baseURL: "https://my.kudisms.net/api",
 });
 
 export const kudismsApi = {
-  sendSms: async (to, message) => {
+  sendSms: async (to, message, name = "Customer") => {
     try {
-      const { data } = await kudisms.get("/corporate", {
-        params: {
-          token: KUDISMS_API_KEY,
-          senderID: KUDISMS_SENDER_ID,
-          recipient: to,
-          message,
-          gateway: "2",
-        },
+      const normalizedPhone = to.replace(/^0/, "234").replace(/\D/g, "");
+
+      const { data } = await kudisms.post("/personalisedsms", {
+        token: KUDISMS_TOKEN,
+        senderID: KUDISMS_SENDER_ID,
+        message,
+        csvHeaders: ["phone_number", "name"],
+        recipients: [{ phone_number: normalizedPhone, name }],
       });
 
-      if (data?.status !== "OK" && data?.status !== "success") {
+      if (data?.status !== "success") {
         logger.warn("Kudisms SMS non-success response", data);
       }
 
@@ -32,10 +32,10 @@ export const kudismsApi = {
     }
   },
 
-  sendWhatsApp: async (to, message) => {
+  sendWhatsApp: async (to, message, name = "Customer") => {
     logger.info(
       "WhatsApp channel not supported by Kudisms sending as SMS instead",
     );
-    return kudismsApi.sendSms(to, message);
+    return kudismsApi.sendSms(to, message, name);
   },
 };
