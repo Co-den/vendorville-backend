@@ -161,7 +161,6 @@ export const assignRiderToOrder = async (
   return { ...dispatch, riderName: rider.name, riderPhone: rider.phone };
 };
 
-// Public — validates a rider's tracking token, returns order info for the rider's page
 export const getDispatchByToken = async (token) => {
   const result = await db
     .select()
