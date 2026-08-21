@@ -15,10 +15,16 @@ export const saveSubscription = async (userId, userType, subscription) => {
   const existing = await db
     .select()
     .from(pushSubscriptions)
-    .where(eq(pushSubscriptions.endpoint, endpoint))
+    .where(
+      and(
+        eq(pushSubscriptions.endpoint, endpoint),
+        eq(pushSubscriptions.userId, userId),
+        eq(pushSubscriptions.userType, userType),
+      ),
+    )
     .limit(1);
-  if (existing.length > 0) return existing[0];
 
+  if (existing.length > 0) return existing[0];
   const [saved] = await db
     .insert(pushSubscriptions)
     .values({
