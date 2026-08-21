@@ -121,18 +121,19 @@ export const notifyOrderEvent = async ({
   vendorEmail,
   vendorPhone,
 }) => {
-  const notifyCustomer = [
-    "order_placed_customer",
-    "order_paid_customer",
-    "order_fulfilled_customer",
-    "order_cancelled_customer",
-  ].includes(`${event}_customer`);
-
   const customerTemplateKey = `${event}_customer`;
+
   if (templates[customerTemplateKey] && order.customerPhone) {
     const content = templates[customerTemplateKey](order, business.name);
+
     try {
-      await kudismsApi.sendSms(order.customerPhone, content.sms);
+      await kudismsApi.sendSms(
+        order.customerPhone,
+        content.sms,
+        order.customerName,
+        business.smsSenderId || "VendorVille",
+      );
+
       await logNotification(
         order.id,
         "sms",
@@ -153,10 +154,18 @@ export const notifyOrderEvent = async ({
   }
 
   const vendorTemplateKey = `${event}_vendor`;
+
   if (templates[vendorTemplateKey] && vendorPhone) {
     const content = templates[vendorTemplateKey](order);
+
     try {
-      await kudismsApi.sendSms(vendorPhone, content.sms);
+      await kudismsApi.sendSms(
+        vendorPhone,
+        content.sms,
+        order.customerName,
+        "VendorVille",
+      );
+
       await logNotification(order.id, "sms", vendorPhone, event, "sent");
     } catch (error) {
       await logNotification(

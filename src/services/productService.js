@@ -157,7 +157,6 @@ export const checkAndNotifyLowStock = async (productId) => {
       .set({ lowStockAlertSent: true })
       .where(eq(products.id, productId));
   } else if (!isLow && !isOut && product.lowStockAlertSent) {
-    // Restocked above threshold — reset the flag so a future dip alerts again
     await db
       .update(products)
       .set({ lowStockAlertSent: false })

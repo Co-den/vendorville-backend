@@ -358,7 +358,7 @@ export const confirmOrder = async (userId, businessId, orderId) => {
 
     if (order.customerPhone) {
       kudismsApi
-        .sendSms(order.customerPhone, smsBody)
+        .sendSms(order.customerPhone, smsBody, order.customerName)
         .catch((err) => logger.error("Confirm SMS error", err));
     }
   } else {
@@ -367,6 +367,7 @@ export const confirmOrder = async (userId, businessId, orderId) => {
         .sendSms(
           order.customerPhone,
           `Your order ${order.orderNumber} from ${business.name} is confirmed and being prepared!`,
+          order.customerName,
         )
         .catch((err) => logger.error("Confirm SMS error", err));
     }

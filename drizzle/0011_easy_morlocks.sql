@@ -1,0 +1,1 @@
+ALTER TABLE "businesses" ADD COLUMN "sms_sender_id" varchar(11);

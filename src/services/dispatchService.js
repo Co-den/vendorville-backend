@@ -145,11 +145,16 @@ export const assignRiderToOrder = async (
 
   // SMS the rider with pickup/delivery details + their unique tracking link
   const riderLink = `${process.env.FRONTEND_URL}/rider/track/${trackingToken}`;
+  const riderMessage =
+    `New delivery: Pick up order ${order.orderNumber} from ` +
+    `${business.name} (${business.address}). ` +
+    `Deliver to: ${order.deliveryAddress}. ` +
+    `Start sharing your location: ${riderLink}`;
+
+  const senderID = business.smsSenderId || "VendorVille";
+
   kudismsApi
-    .sendSms(
-      rider.phone,
-      `New delivery: Pick up order ${order.orderNumber} from ${business.name} (${business.address}). Deliver to: ${order.deliveryAddress}. Start sharing your location: ${riderLink}`,
-    )
+    .sendSms(rider.phone, riderMessage, rider.name, senderID)
     .catch((err) => logger.error("Rider SMS error", err));
 
   notifyOrderEvent({

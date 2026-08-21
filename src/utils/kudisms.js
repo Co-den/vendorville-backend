@@ -9,16 +9,26 @@ const kudisms = axios.create({
 });
 
 export const kudismsApi = {
-  sendSms: async (to, message, name = "Customer") => {
+  sendSms: async (
+    to,
+    message,
+    name = "Customer",
+    senderID = KUDISMS_SENDER_ID,
+  ) => {
     try {
       const normalizedPhone = to.replace(/^0/, "234").replace(/\D/g, "");
 
       const { data } = await kudisms.post("/personalisedsms", {
         token: KUDISMS_TOKEN,
-        senderID: KUDISMS_SENDER_ID,
+        senderID,
         message,
         csvHeaders: ["phone_number", "name"],
-        recipients: [{ phone_number: normalizedPhone, name }],
+        recipients: [
+          {
+            phone_number: normalizedPhone,
+            name,
+          },
+        ],
       });
 
       if (data?.status !== "success") {
@@ -28,14 +38,16 @@ export const kudismsApi = {
       return data;
     } catch (error) {
       logger.error("Kudisms SMS error", error.response?.data || error.message);
+
       throw new Error("Failed to send SMS");
     }
   },
 
-  sendWhatsApp: async (to, message, name = "Customer") => {
+  sendWhatsApp: async (to, message) => {
     logger.info(
-      "WhatsApp channel not supported by Kudisms sending as SMS instead",
+      "WhatsApp channel not supported by Kudisms, sending as SMS instead",
     );
-    return kudismsApi.sendSms(to, message, name);
+
+    return kudismsApi.sendSms(to, message);
   },
 };

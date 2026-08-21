@@ -48,6 +48,7 @@ export const businesses = pgTable("businesses", {
     .default("pending"),
   rejectionReason: text("rejection_reason"),
   currency: varchar("currency", { length: 3 }).notNull().default("NGN"),
+  smsSenderId: varchar("sms_sender_id", { length: 11 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
