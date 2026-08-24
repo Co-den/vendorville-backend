@@ -90,25 +90,9 @@ export const createUser = async ({
         updatedAt: users.updatedAt,
       });
 
-    // Fire-and-forget don't block the signup response on email sending
     try {
-      console.log("========== EMAIL DEBUG ==========");
-      console.log("About to send verification email");
-      console.log("Recipient:", newUser.email);
-      console.log("SMTP host:", process.env.BREVO_SMTP_HOST);
-      console.log("SMTP port:", process.env.BREVO_SMTP_PORT);
-      console.log("SMTP login exists:", !!process.env.BREVO_SMTP_LOGIN);
-      console.log("SMTP password exists:", !!process.env.BREVO_SMTP_PASSWORD);
-      console.log("EMAIL_FROM:", process.env.EMAIL_FROM);
-
       await new Email(newUser).sendVerificationCode(verificationCode);
-
-      console.log("Verification email sent successfully");
-      console.log("================================");
     } catch (emailError) {
-      console.error("VERIFICATION EMAIL FAILED:");
-      console.error(emailError);
-
       logger.error(
         `Signup succeeded but verification email failed for ${newUser.email}`,
         emailError,
@@ -189,7 +173,6 @@ export const verifyEmailCode = async (email, code) => {
   }
 };
 
-// Resend a new verification code to the user
 export const resendVerificationCode = async (email) => {
   try {
     const userResult = await db
@@ -232,7 +215,6 @@ export const resendVerificationCode = async (email) => {
   }
 };
 
-// Verify user credentials and return user data
 export const verifyCredentials = async (email, password, pin) => {
   try {
     const userResult = await db
@@ -269,7 +251,6 @@ export const verifyCredentials = async (email, password, pin) => {
   }
 };
 
-// change password
 export const changePassword = async (userId, currentPassword, newPassword) => {
   const userResult = await db
     .select()
@@ -302,7 +283,6 @@ export const forgotPassword = async (email) => {
     .where(eq(users.email, email))
     .limit(1);
   if (userResult.length === 0) {
-    // Don't reveal whether the email exists respond success regardless
     return { message: "If that email exists, a reset link has been sent." };
   }
   const user = userResult[0];
@@ -312,7 +292,7 @@ export const forgotPassword = async (email) => {
     .createHash("sha256")
     .update(rawToken)
     .digest("hex");
-  const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  const expires = new Date(Date.now() + 10 * 60 * 1000);
 
   await db
     .update(users)
@@ -324,7 +304,6 @@ export const forgotPassword = async (email) => {
   try {
     await new Email(user, resetUrl).sendPasswordReset();
   } catch (error) {
-    // Roll back the token if email fails, so a stale unusable token doesn't linger
     await db
       .update(users)
       .set({ resetPasswordToken: null, resetPasswordExpires: null })

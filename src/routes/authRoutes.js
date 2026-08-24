@@ -28,8 +28,8 @@ router.post("/resend-code", resendCodeLimiter, resendCode);
 router.patch("/change-password", authMiddleware, changePassword);
 router.get("/check-auth", authMiddleware, checkAuth);
 router.post("/logout", logout);
-router.post("/forgot-password", authMiddleware, forgotPassword);
-router.post("/reset-password/:token", authMiddleware, resetPassword);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password/:token", resetPassword);
 
 router.get("/chat", authMiddleware, chatController.getMyThread);
 router.post("/chat", authMiddleware, chatController.sendVendorMessage);

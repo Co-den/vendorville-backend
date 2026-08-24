@@ -24,29 +24,29 @@ const logNotification = async (
 
 const templates = {
   order_placed_customer: (order, businessName) => ({
-    subject: `Order Confirmed — ${order.orderNumber}`,
+    subject: `Order Confirmed ${order.orderNumber}`,
     sms: `Hi ${order.customerName}, your order ${order.orderNumber} from ${businessName} (₦${order.totalAmount.toLocaleString()}) has been received. We'll notify you when it's confirmed.`,
   }),
   order_placed_vendor: (order) => ({
-    subject: `New Order — ${order.orderNumber}`,
+    subject: `New Order ${order.orderNumber}`,
     sms: `New order ${order.orderNumber} from ${order.customerName} for ₦${order.totalAmount.toLocaleString()}. Check your VendorVille dashboard.`,
   }),
   order_paid_customer: (order, businessName) => ({
-    subject: `Payment Confirmed — ${order.orderNumber}`,
+    subject: `Payment Confirmed ${order.orderNumber}`,
     sms: `Hi ${order.customerName}, payment for order ${order.orderNumber} at ${businessName} has been confirmed. Your order is being prepared.`,
   }),
   order_fulfilled_customer: (order, businessName) => ({
-    subject: `Order Ready — ${order.orderNumber}`,
+    subject: `Order Ready ${order.orderNumber}`,
     sms: `Hi ${order.customerName}, your order ${order.orderNumber} from ${businessName} is ready/out for delivery!`,
   }),
   order_cancelled_customer: (order, businessName) => ({
-    subject: `Order Cancelled — ${order.orderNumber}`,
+    subject: `Order Cancelled ${order.orderNumber}`,
     sms: `Hi ${order.customerName}, your order ${order.orderNumber} from ${businessName} has been cancelled. Contact them if you have questions.`,
   }),
   lowStockTemplate: (product, business, isOut) => ({
     subject: isOut
-      ? `Out of Stock — ${product.name}`
-      : `Low Stock Alert — ${product.name}`,
+      ? `Out of Stock ${product.name}`
+      : `Low Stock Alert ${product.name}`,
     sms: isOut
       ? `${business.name}: "${product.name}" (SKU: ${product.sku}) is now OUT OF STOCK. Restock soon to avoid missed sales.`
       : `${business.name}: "${product.name}" (SKU: ${product.sku}) is running low — only ${product.stock} left. Consider restocking.`,
