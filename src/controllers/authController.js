@@ -281,11 +281,22 @@ export const changePassword = async (req, res, next) => {
 export const forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
-    if (!email) return res.status(400).json({ message: "Email is required" });
+
+    console.log("FORGOT PASSWORD BODY:", req.body);
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
     const result = await authService.forgotPassword(email);
+
     res.status(200).json(result);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error("FORGOT PASSWORD ERROR:", error);
+
+    res.status(400).json({
+      message: error.message || "Failed to send reset email",
+    });
   }
 };
 
