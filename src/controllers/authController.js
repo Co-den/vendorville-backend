@@ -1,6 +1,9 @@
 import logger from "#config/logger.js";
 import {
   createUser,
+  passwordChange,
+  passwordForgot,
+  passwordReset,
   resendVerificationCode,
   verifyCredentials,
   verifyEmailCode,
@@ -267,7 +270,7 @@ export const changePassword = async (req, res, next) => {
         .status(400)
         .json({ message: "Current and new password are required" });
     }
-    const result = await authService.changePassword(
+    const result = await passwordChange(
       req.user.id,
       currentPassword,
       newPassword,
@@ -288,7 +291,7 @@ export const forgotPassword = async (req, res, next) => {
       return res.status(400).json({ message: "Email is required" });
     }
 
-    const result = await authService.forgotPassword(email);
+    const result = await passwordForgot(email);
 
     res.status(200).json(result);
   } catch (error) {
@@ -306,7 +309,7 @@ export const resetPassword = async (req, res, next) => {
     const { token } = req.params;
     if (!password)
       return res.status(400).json({ message: "New password is required" });
-    const result = await authService.resetPassword(token, password);
+    const result = await passwordReset(token, password);
     res.status(200).json(result);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -316,10 +319,10 @@ export const resetPassword = async (req, res, next) => {
 export const checkAccountType = async (req, res) => {
   try {
     const { email } = req.body;
-    const vendorExists = await authService.emailExists(email);
+    const vendorExists = await emailExists(email);
     if (vendorExists) return res.status(200).json({ type: "vendor" });
 
-    const staffExists = await staffService.emailExistsAsStaff(email);
+    const staffExists = await emailExistsAsStaff(email);
     if (staffExists) return res.status(200).json({ type: "staff" });
 
     return res.status(200).json({ type: "unknown" });

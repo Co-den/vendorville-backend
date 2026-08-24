@@ -251,7 +251,7 @@ export const verifyCredentials = async (email, password, pin) => {
   }
 };
 
-export const changePassword = async (userId, currentPassword, newPassword) => {
+export const passwordChange = async (userId, currentPassword, newPassword) => {
   const userResult = await db
     .select()
     .from(users)
@@ -276,7 +276,7 @@ export const changePassword = async (userId, currentPassword, newPassword) => {
   return { message: "Password updated successfully" };
 };
 
-export const forgotPassword = async (email) => {
+export const passwordForgot = async (email) => {
   const userResult = await db
     .select()
     .from(users)
@@ -314,7 +314,7 @@ export const forgotPassword = async (email) => {
   return { message: "If that email exists, a reset link has been sent." };
 };
 
-export const resetPassword = async (rawToken, newPassword) => {
+export const passwordReset = async (rawToken, newPassword) => {
   const hashedToken = crypto
     .createHash("sha256")
     .update(rawToken)
