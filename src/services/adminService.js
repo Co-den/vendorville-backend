@@ -2,6 +2,7 @@ import { db } from "#config/database.js";
 import logger from "#config/logger.js";
 import { admins } from "#models/admin.js";
 import { businesses } from "#models/business.js";
+import { orders } from "#models/order.js";
 import { subscriptions } from "#models/subscription.js";
 import { users } from "#models/user.js";
 import Email from "#utils/email.js";
@@ -138,32 +139,65 @@ export const getStats = async () => {
 export const getEnhancedStats = async () => {
   const allBusinesses = await db.select().from(businesses);
   const allSubs = await db.select().from(subscriptions);
+  const allOrders = await db.select().from(orders);
 
-  // Businesses grouped by plan (via their owner's subscription)
+  const total = allBusinesses.length;
+
+  const pending = allBusinesses.filter(
+    (b) => b.verificationStatus === "pending",
+  ).length;
+
+  const approved = allBusinesses.filter(
+    (b) => b.verificationStatus === "approved",
+  ).length;
+
+  const rejected = allBusinesses.filter(
+    (b) => b.verificationStatus === "rejected",
+  ).length;
+
   const businessesByOwner = {};
-  allBusinesses.forEach((b) => {
-    if (!businessesByOwner[b.userId]) businessesByOwner[b.userId] = 0;
-    businessesByOwner[b.userId]++;
+
+  allBusinesses.forEach((business) => {
+    businessesByOwner[business.userId] =
+      (businessesByOwner[business.userId] || 0) + 1;
   });
 
-  const planCounts = { starter: 0, professional: 0, enterprise: 0 };
-  const planBusinessCounts = { starter: 0, professional: 0, enterprise: 0 };
+  const planCounts = {
+    starter: 0,
+    professional: 0,
+    enterprise: 0,
+  };
+
+  const planBusinessCounts = {
+    starter: 0,
+    professional: 0,
+    enterprise: 0,
+  };
 
   allSubs.forEach((sub) => {
-    planCounts[sub.plan] = (planCounts[sub.plan] || 0) + 1;
-    planBusinessCounts[sub.plan] =
-      (planBusinessCounts[sub.plan] || 0) +
-      (businessesByOwner[sub.userId] || 0);
+    const plan = sub.plan;
+
+    if (!planCounts[plan]) {
+      return;
+    }
+
+    planCounts[plan] += 1;
+
+    planBusinessCounts[plan] += businessesByOwner[sub.userId] || 0;
   });
 
-  // Total subscription revenue (based on plan prices mirrors your subscriptionService.js pricing)
-  const planPrices = { starter: 5500, professional: 10500, enterprise: 15500 };
+  const planPrices = {
+    starter: 5500,
+    professional: 10500,
+    enterprise: 15500,
+  };
+
   const totalSubscriptionRevenue = allSubs.reduce((sum, sub) => {
-    return sum + (planPrices[sub.plan] || 0);
+    const plan = sub.plan;
+
+    return sum + (planPrices[plan] || 0);
   }, 0);
 
-  // Vendors grouped by state derived from business address text.
-  // Since address is free-text, we match against known Nigerian state names.
   const nigerianStates = [
     "Lagos",
     "Abuja",
@@ -206,52 +240,68 @@ export const getEnhancedStats = async () => {
   ];
 
   const stateCounts = {};
-  allBusinesses.forEach((b) => {
+
+  allBusinesses.forEach((business) => {
+    // Prevent null/undefined address from crashing the API
+    const address = business.address || "";
+
     const matchedState = nigerianStates.find((state) =>
-      b.address.toLowerCase().includes(state.toLowerCase()),
+      address.toLowerCase().includes(state.toLowerCase()),
     );
-    const key = matchedState || "Unspecified";
-    stateCounts[key] = (stateCounts[key] || 0) + 1;
+
+    const state = matchedState || "Unspecified";
+
+    stateCounts[state] = (stateCounts[state] || 0) + 1;
   });
 
   const locationData = Object.entries(stateCounts)
-    .map(([state, count]) => ({ state, count }))
+    .map(([state, count]) => ({
+      state,
+      count,
+    }))
     .sort((a, b) => b.count - a.count);
 
-  const allOrders = await db.select().from(orders);
   const salesByBusiness = {};
+
   allOrders
-    .filter((o) => o.status !== "cancelled")
-    .forEach((o) => {
-      salesByBusiness[o.businessId] =
-        (salesByBusiness[o.businessId] || 0) + o.totalAmount;
+    .filter((order) => order.status !== "cancelled")
+    .forEach((order) => {
+      salesByBusiness[order.businessId] =
+        (salesByBusiness[order.businessId] || 0) + order.totalAmount;
     });
 
-  const topBusinessId = Object.entries(salesByBusiness).sort(
+  const topBusinessEntry = Object.entries(salesByBusiness).sort(
     (a, b) => b[1] - a[1],
-  )[0]?.[0];
+  )[0];
+
+  const topBusinessId = topBusinessEntry ? Number(topBusinessEntry[0]) : null;
+
   const topBusiness = topBusinessId
-    ? allBusinesses.find((b) => b.id === Number(topBusinessId))
+    ? allBusinesses.find((business) => business.id === topBusinessId)
     : null;
+
   const topState = locationData[0]?.state || "N/A";
+
   return {
-    total: allBusinesses.length,
-    pending: allBusinesses.filter((b) => b.verificationStatus === "pending")
-      .length,
-    approved: allBusinesses.filter((b) => b.verificationStatus === "approved")
-      .length,
-    rejected: allBusinesses.filter((b) => b.verificationStatus === "rejected")
-      .length,
+    total,
+    pending,
+    approved,
+    rejected,
+
     planCounts,
     planBusinessCounts,
-    totalSubscriptionRevenue: totalSubscriptionRevenue,
+
+    totalSubscriptionRevenue,
+
     locationData,
+
     topSellingVendor: topBusiness
       ? {
           name: topBusiness.name,
           totalSales: (salesByBusiness[topBusiness.id] || 0) / 100,
         }
       : null,
+
     topVendorState: topState,
   };
 };
