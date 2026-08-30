@@ -85,6 +85,13 @@
       "when": 1787302531409,
       "tag": "0011_easy_morlocks",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1788128965938,
+      "tag": "0012_futuristic_red_ghost",
+      "breakpoints": true
     }
   ]
 }
