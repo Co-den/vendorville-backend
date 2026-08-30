@@ -353,6 +353,105 @@ export default class Email {
             </p>
           `),
         };
+      case "trialExpired":
+        return {
+          subject: "Your VendorVille Trial Has Ended",
+          html: this.wrapper(`
+            <div style="
+              background:linear-gradient(135deg, #2d6a3b 0%, #3a844f 100%);
+              color:#fff;
+              padding:25px;
+              border-radius:12px;
+              text-align:center;
+              margin-bottom:30px;
+            ">
+              <h2 style="margin:0; font-size:24px;">
+                Your Trial Period Has Ended
+              </h2>
+              <p style="margin:8px 0 0; opacity:0.9;">
+                Time to unlock the full power of VendorVille
+              </p>
+            </div>
+
+            <p style="font-size:15px; line-height:1.7; color:#555;">
+              Your 14-day free trial of VendorVille has ended. To continue managing your business 
+              seamlessly with all premium features, please upgrade to a paid plan.
+            </p>
+
+            <h3 style="
+              color:#132e1b;
+              font-size:18px;
+              margin-top:30px;
+              margin-bottom:16px;
+            ">
+              What You'll Get with a Paid Plan:
+            </h3>
+
+            <ul style="
+              font-size:15px;
+              line-height:1.8;
+              color:#555;
+              padding-left:20px;
+            ">
+              <li>Advanced POS & Inventory Management</li>
+              <li>Real-time Dispatch & Rider Tracking</li>
+              <li>Staff Management & Scheduling</li>
+              <li>Customer Loyalty Programs & Gift Cards</li>
+              <li>AI-Powered Order Creation</li>
+              <li>24/7 Priority Support</li>
+            </ul>
+
+            <div style="text-align:center; margin:35px 0;">
+              <a href="${process.env.FRONTEND_URL}/pricing"
+                style="
+                  display:inline-block;
+                  background:#3a844f;
+                  color:#ffffff;
+                  text-decoration:none;
+                  padding:15px 35px;
+                  border-radius:8px;
+                  font-size:15px;
+                  font-weight:bold;
+                "
+              >
+                View Pricing Plans
+              </a>
+            </div>
+
+            <div style="
+              background:#f9fafb;
+              padding:20px;
+              border-radius:10px;
+              margin:30px 0;
+            ">
+              <h4 style="
+                color:#132e1b;
+                font-size:15px;
+                margin-top:0;
+              ">
+                Questions? We're here to help!
+              </h4>
+              <p style="
+                font-size:14px;
+                line-height:1.6;
+                color:#667085;
+                margin:0;
+              ">
+                Contact our support team at <strong>support@vendorville.com</strong> 
+                or reply to this email. We'd love to help you choose the right plan for your business.
+              </p>
+            </div>
+
+            <p style="
+              font-size:14px;
+              color:#667085;
+              line-height:1.6;
+            ">
+              Thank you for trying VendorVille, ${this.firstName}. We hope you've had a great experience 
+              and look forward to helping you grow your business! 🚀
+            </p>
+          `),
+        };
 
       case "custom":
         return {
@@ -408,6 +507,9 @@ export default class Email {
     return this.send("passwordReset");
   }
 
+  async sendTrialExpired() {
+    return this.send("trialExpired");
+  }
   async sendNotification(subject, message) {
     return this.send("custom", { subject, message });
   }

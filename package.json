@@ -23,7 +23,8 @@
     "#routes/*": "./src/routes/*",
     "#services/*": "./src/services/*",
     "#validations/*": "./src/validations/*",
-    "#utils/*": "./src/utils/*"
+    "#utils/*": "./src/utils/*",
+    "#jobs/*": "./src/jobs/*"
   },
   "scripts": {
     "dev": "nodemon src/index.js",
@@ -62,6 +63,7 @@
     "mailersend": "^3.1.0",
     "morgan": "^1.10.1",
     "multer": "^2.2.0",
+    "node-cron": "^4.6.0",
     "nodemailer": "^9.0.3",
     "nodemon": "^3.1.14",
     "resend": "^6.17.2",

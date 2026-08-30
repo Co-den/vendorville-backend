@@ -14,18 +14,15 @@ export const products = pgTable("products", {
   businessId: integer("business_id")
     .notNull()
     .references(() => businesses.id),
-
   name: varchar("name", { length: 255 }).notNull(),
+  description: varchar("name", {length: 1500}).notNull(),
   sku: varchar("sku", { length: 100 }).notNull(),
   category: varchar("category", { length: 100 }).notNull(),
   imageUrl: text("image_url"),
-
   price: integer("price").notNull(),
   stock: integer("stock").notNull().default(0),
   lowStockThreshold: integer("low_stock_threshold").notNull().default(10),
-
   lowStockAlertSent: boolean("low_stock_alert_sent").notNull().default(false),
-
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

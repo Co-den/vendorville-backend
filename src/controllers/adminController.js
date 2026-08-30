@@ -1,4 +1,5 @@
 import * as adminService from "#services/adminService.js";
+import { manualTrialExpirationCheck } from "#jobs/trial-expiration.js";
 import { cookies } from "#utils/cookies.js";
 import { jwtSign } from "#utils/jwt.js";
 
@@ -73,3 +74,12 @@ export const getStats = async (req, res) => {
     res.status(500).json({ message: "Error loading stats" });
   }
 };
+
+export const TrialExpirationCheck = async (req, res) => {
+  try {
+    const result = await manualTrialExpirationCheck();
+    return res.json(result);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+}
