@@ -44,6 +44,7 @@ export const createProduct = async (userId, businessId, data, file) => {
     .values({
       businessId,
       name: data.name,
+      description: data.description,
       sku: data.sku,
       category: data.category,
       imageUrl,
@@ -90,6 +91,7 @@ export const updateProduct = async (
     .update(products)
     .set({
       name: data.name,
+      description:data.description,
       sku: data.sku,
       category: data.category,
       imageUrl,
