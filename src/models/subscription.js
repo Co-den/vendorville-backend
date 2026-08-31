@@ -13,14 +13,13 @@ export const subscriptions = pgTable("subscriptions", {
     .notNull()
     .unique()
     .references(() => users.id),
-
   plan: varchar("plan", { length: 20 }).notNull().default("starter"),
-  status: varchar("status", { length: 20 }).notNull().default("active"), // active | expired | cancelled
+  status: varchar("status", { length: 20 }).notNull().default("trial"),
+  trialEndsAt: timestamp("trial_ends_at"),
   renewsAt: timestamp("renews_at"),
-
   paystackAuthorizationCode: varchar("paystack_authorization_code", {
     length: 100,
-  }), // for future auto-charging
+  }),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

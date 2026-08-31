@@ -11,9 +11,7 @@ export const startTrialExpirationJob = () => {
   cron.schedule("0 2 * * *", async () => {
     try {
       logger.info("[Cron] Running trial expiration check...");
-
       const now = new Date();
-
       const expiredTrials = await db
         .select()
         .from(subscriptions)

@@ -30,6 +30,18 @@ export const createBusiness = async (userId, data, files) => {
   if (sub.status !== "active") {
     throw new Error("SUBSCRIPTION_INACTIVE");
   }
+         
+
+  const now = new Date();
+  const isTrialActive =
+    sub.status === "trial" &&
+    sub.trialEndsAt &&
+    new Date(sub.trialEndsAt) > now;
+  const isSubscriptionActive = sub.status === "active";
+  if (!isSubscriptionActive && !isTrialActive) {
+    throw new Error("SUBSCRIPTION_INACTIVE");
+  }
+
 
   const existing = await db
     .select()

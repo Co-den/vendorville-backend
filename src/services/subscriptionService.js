@@ -6,8 +6,8 @@ import { eq, gt, lt, and } from "drizzle-orm";
 const planPrices = { starter: 5500, professional: 10500, enterprise: 15500 };
 
 export const staffLimits = {
-  starter: 1,
-  professional: 3,
+  starter: 3,
+  professional: 5,
   enterprise: Infinity,
 };
 
@@ -16,7 +16,9 @@ const TRIAL_MS = TRIAL_DAYS * 24 * 60 * 60 * 1000;
 const SUBSCRIPTION_DAYS = 30;
 const SUBSCRIPTION_MS = SUBSCRIPTION_DAYS * 24 * 60 * 60 * 1000;
 
-// Get or create subscription
+
+
+
 export const getSubscription = async (userId) => {
   const result = await db
     .select()
@@ -27,12 +29,12 @@ export const getSubscription = async (userId) => {
   if (result.length === 0) {
     const now = new Date();
     const trialEndsAt = new Date(now.getTime() + TRIAL_MS);
-
     const [created] = await db
       .insert(subscriptions)
       .values({
         userId,
         plan: "starter",
+        limit: 1,
         trialEndsAt,
         status: "trial",
       })
@@ -41,7 +43,24 @@ export const getSubscription = async (userId) => {
     return created;
   }
 
-  return result[0];
+  const subscription = result[0];
+  if (
+    subscription.status === "trial" &&
+    subscription.trialEndsAt &&
+    new Date(subscription.trialEndsAt) <= new Date()
+  ) {
+    const [updated] = await db
+      .update(subscriptions)
+      .set({
+        status: "expired",
+      })
+      .where(eq(subscriptions.id, subscription.id))
+      .returning();
+
+    return updated;
+  }
+
+  return subscription;
 };
 
 // Check if user is in trial
