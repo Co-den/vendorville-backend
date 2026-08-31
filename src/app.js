@@ -13,7 +13,6 @@ import storefrontRoutes from "#routes/storefrontRoutes.js";
 import subscriptionRoutes from "#routes/subscriptionRoutes.js";
 import userRoutes from "#routes/userRoutes.js";
 import walletRoutes from "#routes/walletRoutes.js";
-import { startTrialExpirationJob } from "#jobs/trial-expiration.js";
 import webhookRoutes from "#routes/webhookRoutes.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -110,7 +109,7 @@ app.get("/api", (req, res) => {
 // Rate limiting middleware for all API routes
 app.use("/api", apiLimiter);
 
-startTrialExpirationJob();
+
 
 // Routes
 app.use("/api/auth", authRoutes);

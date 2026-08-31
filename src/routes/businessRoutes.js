@@ -43,13 +43,18 @@ router.get(
   restrictToOwnBusiness,
   staffController.getStaff,
 );
-router.post("/:id/staff", ownerOnly, staffController.inviteStaff);
+router.post("/:id/staff/invite", ownerOnly, staffController.inviteStaff);
 router.delete("/:id/staff/:staffId", ownerOnly, staffController.removeStaff);
 router.patch(
   "/:id/staff/:staffId/active",
   ownerOnly,
   staffController.toggleStaffActive,
 );
+router.post("/:id/staff/:staffId/resetpassword", staffController.resetStaffPassword);
+router.patch("/:id/staff/:staffId/update", staffController.updateStaffRole);
+router.get("/:id/staff/stats", staffController.getStaffStats);
+router.get("/:id/staff/:staffId/count", staffController.getStaffCount);
+router.get("/:id/staff/:staffId", staffController.getStaffById);
 
 router.patch(
   "/:id/availability",

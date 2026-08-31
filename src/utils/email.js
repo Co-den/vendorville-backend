@@ -452,7 +452,111 @@ export default class Email {
             </p>
           `),
         };
+      case "staffInvitation":
+        return {
+          subject: "You've Been Invited to Join VendorVille",
+          html: this.wrapper(`
+            <p>You've been invited to join a business on VendorVille!</p>
 
+            <div style="
+              background:#f4f4f5;
+              padding:20px;
+              border-radius:8px;
+              margin:25px 0;
+            ">
+              <p style="margin:0; font-size:14px; color:#666;">
+                Your login credentials:
+              </p>
+              <p style="
+                font-size:16px;
+                font-weight:bold;
+                margin:10px 0;
+                font-family:monospace;
+                color:#132e1b;
+              ">
+                Email: ${extra.email}
+              </p>
+              <p style="
+                font-size:16px;
+                font-weight:bold;
+                margin:0;
+                font-family:monospace;
+                color:#132e1b;
+              ">
+                Password: ${extra.tempPassword}
+              </p>
+            </div>
+
+            <p>
+              <strong>Important:</strong> Please change your password immediately after logging in for security.
+            </p>
+
+            <div style="text-align:center; margin:30px 0;">
+              <a href="${process.env.FRONTEND_URL}/staff/login"
+                style="
+                  background:#132e1b;
+                  color:#fff;
+                  text-decoration:none;
+                  padding:14px 30px;
+                  border-radius:8px;
+                  display:inline-block;
+                  font-weight:bold;
+                "
+              >
+                Login to VendorVille
+              </a>
+            </div>
+
+            <p style="color:#667085; font-size:13px;">
+              This invitation was sent because you were added as a staff member. 
+              If you didn't expect this, please contact your business administrator.
+            </p>
+          `),
+        };
+
+      case "staffPasswordReset":
+        return {
+          subject: "Your Password Has Been Reset",
+          html: this.wrapper(`
+            <p>Your VendorVille staff account password has been reset by your business administrator.</p>
+
+            <div style="
+              background:#eaf6ed;
+              padding:20px;
+              border-radius:8px;
+              margin:25px 0;
+            ">
+              <p style="
+                margin:0;
+                color:#3a844f;
+                font-weight:bold;
+              ">
+                ✓ If you requested this password reset, you can ignore this email.
+              </p>
+            </div>
+
+            <p>
+              If you didn't request this or have any concerns, please contact your business administrator immediately.
+            </p>
+
+            <div style="text-align:center; margin:30px 0;">
+              <a href="${process.env.FRONTEND_URL}/staff/login"
+                style="
+                  background:#132e1b;
+                  color:#fff;
+                  text-decoration:none;
+                  padding:14px 30px;
+                  border-radius:8px;
+                  display:inline-block;
+                  font-weight:bold;
+                "
+              >
+                Back to Login
+              </a>
+            </div>
+          `),
+        };
+      
       case "custom":
         return {
           subject: extra.subject,
@@ -513,4 +617,13 @@ export default class Email {
   async sendNotification(subject, message) {
     return this.send("custom", { subject, message });
   }
+
+  async sendStaffInvitation(email, tempPassword) {
+    return this.send("staffInvitation", { email, tempPassword });
+  }
+
+  async sendStaffPasswordReset() {
+    return this.send("staffPasswordReset");
+  }
+
 }

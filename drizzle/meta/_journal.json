@@ -92,6 +92,13 @@
       "when": 1788128965938,
       "tag": "0012_futuristic_red_ghost",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1788130004297,
+      "tag": "0013_short_ares",
+      "breakpoints": true
     }
   ]
 }
