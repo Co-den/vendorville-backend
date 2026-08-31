@@ -1,10 +1,10 @@
 import logger from "#config/logger.js";
 import {
-    createUser,
-    deleteUser,
-    getAllUser,
-    getUserById,
-    updateUser,
+  createUser,
+  deleteUser,
+  getAllUser,
+  getUserById,
+  updateUser,
 } from "#services/userService.js";
 import formValidationErrors from "#utils/format.js";
 import { userIdSchema } from "#validations/user.validation.js";

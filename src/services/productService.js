@@ -91,7 +91,7 @@ export const updateProduct = async (
     .update(products)
     .set({
       name: data.name,
-      description:data.description,
+      description: data.description,
       sku: data.sku,
       category: data.category,
       imageUrl,

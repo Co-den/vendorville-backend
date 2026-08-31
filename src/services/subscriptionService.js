@@ -57,7 +57,7 @@ export const getTrialDaysRemaining = (subscription) => {
   const now = new Date();
   const trialEnd = new Date(subscription.trialEndsAt);
   const daysRemaining = Math.ceil(
-    (trialEnd.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)
+    (trialEnd.getTime() - now.getTime()) / (24 * 60 * 60 * 1000),
   );
 
   return Math.max(0, daysRemaining);
@@ -127,10 +127,7 @@ export const getSubscriptionStats = async () => {
     .select()
     .from(subscriptions)
     .where(
-      and(
-        eq(subscriptions.status, "active"),
-        gt(subscriptions.renewsAt, now)
-      )
+      and(eq(subscriptions.status, "active"), gt(subscriptions.renewsAt, now)),
     );
 
   // Count trial subscriptions by plan
@@ -140,8 +137,8 @@ export const getSubscriptionStats = async () => {
     .where(
       and(
         eq(subscriptions.status, "trial"),
-        gt(subscriptions.trialEndsAt, now)
-      )
+        gt(subscriptions.trialEndsAt, now),
+      ),
     );
 
   // Count expired trials
@@ -151,8 +148,8 @@ export const getSubscriptionStats = async () => {
     .where(
       and(
         eq(subscriptions.status, "trial"),
-        lt(subscriptions.trialEndsAt, now)
-      )
+        lt(subscriptions.trialEndsAt, now),
+      ),
     );
 
   const stats = {
@@ -190,8 +187,8 @@ export const getSubscriptionCountByPlan = async () => {
       and(
         eq(subscriptions.plan, "starter"),
         eq(subscriptions.status, "active"),
-        gt(subscriptions.renewsAt, now)
-      )
+        gt(subscriptions.renewsAt, now),
+      ),
     );
 
   const professionalActive = await db
@@ -201,8 +198,8 @@ export const getSubscriptionCountByPlan = async () => {
       and(
         eq(subscriptions.plan, "professional"),
         eq(subscriptions.status, "active"),
-        gt(subscriptions.renewsAt, now)
-      )
+        gt(subscriptions.renewsAt, now),
+      ),
     );
 
   const enterpriseActive = await db
@@ -212,8 +209,8 @@ export const getSubscriptionCountByPlan = async () => {
       and(
         eq(subscriptions.plan, "enterprise"),
         eq(subscriptions.status, "active"),
-        gt(subscriptions.renewsAt, now)
-      )
+        gt(subscriptions.renewsAt, now),
+      ),
     );
 
   return {
@@ -221,7 +218,9 @@ export const getSubscriptionCountByPlan = async () => {
     professional: professionalActive.length,
     enterprise: enterpriseActive.length,
     total:
-      starterActive.length + professionalActive.length + enterpriseActive.length,
+      starterActive.length +
+      professionalActive.length +
+      enterpriseActive.length,
   };
 };
 

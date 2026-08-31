@@ -8,7 +8,7 @@ const router = express.Router();
 router.use(authMiddleware);
 //router.use(securityMiddleware);
 
-router.get("/subscription", subscriptionController.getSubscription);
+router.get("/", subscriptionController.getSubscription);
 router.post(
   "/subscription/upgrade",
   paymentLimiter,

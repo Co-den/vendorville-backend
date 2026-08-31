@@ -46,8 +46,8 @@ export const getStaffById = async (userId, businessId, staffId) => {
     .where(
       and(
         eq(staffMembers.id, staffId),
-        eq(staffMembers.businessId, businessId)
-      )
+        eq(staffMembers.businessId, businessId),
+      ),
     )
     .limit(1);
 
@@ -62,7 +62,7 @@ export const getStaffById = async (userId, businessId, staffId) => {
 export const inviteStaff = async (
   userId,
   businessId,
-  { name, email, role, tempPassword }
+  { name, email, role, tempPassword },
 ) => {
   await assertBusinessOwnership(userId, businessId);
 
@@ -79,11 +79,11 @@ export const inviteStaff = async (
   }
 
   const duplicateEmail = existing.find(
-    (s) => s.email.toLowerCase() === email.toLowerCase()
+    (s) => s.email.toLowerCase() === email.toLowerCase(),
   );
   if (duplicateEmail) {
     throw new Error(
-      "A staff member with this email already exists for this business"
+      "A staff member with this email already exists for this business",
     );
   }
 
@@ -130,8 +130,8 @@ export const removeStaff = async (userId, businessId, staffId) => {
     .where(
       and(
         eq(staffMembers.id, staffId),
-        eq(staffMembers.businessId, businessId)
-      )
+        eq(staffMembers.businessId, businessId),
+      ),
     )
     .limit(1);
 
@@ -144,8 +144,8 @@ export const removeStaff = async (userId, businessId, staffId) => {
     .where(
       and(
         eq(staffMembers.id, staffId),
-        eq(staffMembers.businessId, businessId)
-      )
+        eq(staffMembers.businessId, businessId),
+      ),
     );
 
   logger.info(`Staff ${staffId} removed from business ${businessId}`);
@@ -155,7 +155,7 @@ export const toggleStaffActive = async (
   userId,
   businessId,
   staffId,
-  isActive
+  isActive,
 ) => {
   await assertBusinessOwnership(userId, businessId);
 
@@ -165,8 +165,8 @@ export const toggleStaffActive = async (
     .where(
       and(
         eq(staffMembers.id, staffId),
-        eq(staffMembers.businessId, businessId)
-      )
+        eq(staffMembers.businessId, businessId),
+      ),
     )
     .limit(1);
 
@@ -180,8 +180,8 @@ export const toggleStaffActive = async (
     .where(
       and(
         eq(staffMembers.id, staffId),
-        eq(staffMembers.businessId, businessId)
-      )
+        eq(staffMembers.businessId, businessId),
+      ),
     )
     .returning({
       id: staffMembers.id,
@@ -190,7 +190,7 @@ export const toggleStaffActive = async (
     });
 
   logger.info(
-    `Staff ${staffId} ${isActive ? "activated" : "deactivated"} in business ${businessId}`
+    `Staff ${staffId} ${isActive ? "activated" : "deactivated"} in business ${businessId}`,
   );
 
   return updated;
@@ -255,8 +255,8 @@ export const updateStaffRole = async (userId, businessId, staffId, newRole) => {
     .where(
       and(
         eq(staffMembers.id, staffId),
-        eq(staffMembers.businessId, businessId)
-      )
+        eq(staffMembers.businessId, businessId),
+      ),
     )
     .returning({
       id: staffMembers.id,
@@ -277,7 +277,7 @@ export const resetStaffPassword = async (
   userId,
   businessId,
   staffId,
-  newPassword
+  newPassword,
 ) => {
   await assertBusinessOwnership(userId, businessId);
 
@@ -287,8 +287,8 @@ export const resetStaffPassword = async (
     .where(
       and(
         eq(staffMembers.id, staffId),
-        eq(staffMembers.businessId, businessId)
-      )
+        eq(staffMembers.businessId, businessId),
+      ),
     )
     .limit(1);
 
@@ -304,8 +304,8 @@ export const resetStaffPassword = async (
     .where(
       and(
         eq(staffMembers.id, staffId),
-        eq(staffMembers.businessId, businessId)
-      )
+        eq(staffMembers.businessId, businessId),
+      ),
     )
     .returning({
       id: staffMembers.id,
@@ -314,7 +314,6 @@ export const resetStaffPassword = async (
     });
 
   logger.info(`Password reset for staff ${staffId}`);
-
 
   try {
     const user = { firstName: updated.name, email: updated.email };

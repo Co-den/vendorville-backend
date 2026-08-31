@@ -50,7 +50,10 @@ router.patch(
   ownerOnly,
   staffController.toggleStaffActive,
 );
-router.post("/:id/staff/:staffId/resetpassword", staffController.resetStaffPassword);
+router.post(
+  "/:id/staff/:staffId/resetpassword",
+  staffController.resetStaffPassword,
+);
 router.patch("/:id/staff/:staffId/update", staffController.updateStaffRole);
 router.get("/:id/staff/stats", staffController.getStaffStats);
 router.get("/:id/staff/:staffId/count", staffController.getStaffCount);

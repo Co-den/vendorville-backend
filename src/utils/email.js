@@ -556,7 +556,7 @@ export default class Email {
             </div>
           `),
         };
-      
+
       case "custom":
         return {
           subject: extra.subject,
@@ -625,5 +625,4 @@ export default class Email {
   async sendStaffPasswordReset() {
     return this.send("staffPasswordReset");
   }
-
 }

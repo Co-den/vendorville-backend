@@ -39,7 +39,9 @@ router.post(
   chatController.sendAdminMessage,
 );
 
-router.post("/api/admin/check-expired-trials",
-  adminController.TrialExpirationCheck);
+router.post(
+  "/api/admin/check-expired-trials",
+  adminController.TrialExpirationCheck,
+);
 
 export default router;

@@ -14,10 +14,7 @@ export const getStaff = async (req, res) => {
 
 export const getStaffCount = async (req, res) => {
   try {
-    const count = await staffService.getStaffCount(
-      req.user.id,
-      req.params.id
-    );
+    const count = await staffService.getStaffCount(req.user.id, req.params.id);
     res.status(200).json({ count });
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -29,7 +26,7 @@ export const getStaffById = async (req, res) => {
     const staff = await staffService.getStaffById(
       req.user.id,
       req.params.id,
-      req.params.staffId
+      req.params.staffId,
     );
     res.status(200).json({ staff });
   } catch (error) {
@@ -39,10 +36,7 @@ export const getStaffById = async (req, res) => {
 
 export const getStaffStats = async (req, res) => {
   try {
-    const stats = await staffService.getStaffStats(
-      req.user.id,
-      req.params.id
-    );
+    const stats = await staffService.getStaffStats(req.user.id, req.params.id);
     res.status(200).json({ stats });
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -54,7 +48,7 @@ export const inviteStaff = async (req, res) => {
     const staff = await staffService.inviteStaff(
       req.user.id,
       req.params.id,
-      req.body
+      req.body,
     );
     res.status(201).json({ staff });
   } catch (error) {
@@ -74,7 +68,7 @@ export const removeStaff = async (req, res) => {
     await staffService.removeStaff(
       req.user.id,
       req.params.id,
-      req.params.staffId
+      req.params.staffId,
     );
     res.status(200).json({ message: "Staff member removed" });
   } catch (error) {
@@ -88,7 +82,7 @@ export const toggleStaffActive = async (req, res) => {
       req.user.id,
       req.params.id,
       req.params.staffId,
-      req.body.isActive
+      req.body.isActive,
     );
     res.status(200).json({ staff });
   } catch (error) {
@@ -102,7 +96,7 @@ export const updateStaffRole = async (req, res) => {
       req.user.id,
       req.params.id,
       req.params.staffId,
-      req.body.newRole
+      req.body.newRole,
     );
     res.status(200).json({ staff });
   } catch (error) {
@@ -116,7 +110,7 @@ export const resetStaffPassword = async (req, res) => {
       req.user.id,
       req.params.id,
       req.params.staffId,
-      req.body.newPassword
+      req.body.newPassword,
     );
     res.status(200).json({
       message: "Password reset and notification email sent",

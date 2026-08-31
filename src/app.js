@@ -109,8 +109,6 @@ app.get("/api", (req, res) => {
 // Rate limiting middleware for all API routes
 app.use("/api", apiLimiter);
 
-
-
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);

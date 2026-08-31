@@ -2,9 +2,9 @@ import { db } from "#config/database.js";
 import logger from "#config/logger.js";
 import { users } from "#models/user.js";
 import {
-    createUserSchema,
-    updateUserSchema,
-    userIdSchema,
+  createUserSchema,
+  updateUserSchema,
+  userIdSchema,
 } from "#validations/user.validation.js";
 import { eq } from "drizzle-orm";
 

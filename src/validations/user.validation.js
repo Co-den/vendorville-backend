@@ -37,35 +37,15 @@ export const createUserSchema = z.object({
     .max(255, "Business name cannot exceed 255 characters")
     .trim(),
 
-  businessType: z
-    .string()
-    .min(2, "Business type is required")
-    .max(100)
-    .trim(),
+  businessType: z.string().min(2, "Business type is required").max(100).trim(),
 
-  country: z
-    .string()
-    .min(2, "Country is required")
-    .max(100)
-    .trim(),
+  country: z.string().min(2, "Country is required").max(100).trim(),
 
-  timeZone: z
-    .string()
-    .min(2, "Time zone is required")
-    .max(100)
-    .trim(),
+  timeZone: z.string().min(2, "Time zone is required").max(100).trim(),
 
-  state: z
-    .string()
-    .min(2, "State is required")
-    .max(100)
-    .trim(),
+  state: z.string().min(2, "State is required").max(100).trim(),
 
-  city: z
-    .string()
-    .min(2, "City is required")
-    .max(100)
-    .trim(),
+  city: z.string().min(2, "City is required").max(100).trim(),
 
   businessAddress: z
     .string()
@@ -73,11 +53,7 @@ export const createUserSchema = z.object({
     .max(255)
     .trim(),
 
-  postalCode: z
-    .string()
-    .max(20)
-    .trim()
-    .optional(),
+  postalCode: z.string().max(20).trim().optional(),
 
   pin: z
     .string()
@@ -90,8 +66,5 @@ export const createUserSchema = z.object({
 export const updateUserSchema = createUserSchema.partial().strict();
 
 export const userIdSchema = z.object({
-  id: z.coerce
-    .number()
-    .int()
-    .positive("User ID must be a positive integer"),
+  id: z.coerce.number().int().positive("User ID must be a positive integer"),
 });
