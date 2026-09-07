@@ -125,4 +125,30 @@ export const paystackApi = {
       throw new Error("Failed to fetch banks");
     }
   },
+  initializeTransaction: async ({
+    email,
+    amount,
+    reference,
+    metadata,
+  }) => {
+    try {
+      const { data } = await paystack.post("/transaction/initialize", {
+        email,
+        amount,
+        reference,
+        currency: "NGN",
+        metadata,
+      });
+
+      return data.data;
+    } catch (error) {
+      logger.error(
+        "Paystack initializeTransaction error",
+        error.response?.data || error.message,
+      );
+
+      throw new Error("Failed to initialize Paystack transaction");
+    }
+  },
 };
+

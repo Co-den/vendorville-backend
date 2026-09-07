@@ -11,6 +11,7 @@ import { getOrderDispatch } from "#services/dispatchService.js";
 import { notifyOrderEvent } from "#services/notificationService.js";
 import { checkAndNotifyLowStock } from "#services/productService.js";
 import { getReviewStats } from "#services/reviewService.js";
+import { paystackApi } from "#utils/paystack.js";
 import bcrypt from "bcrypt";
 import { and, desc, eq } from "drizzle-orm";
 
@@ -184,6 +185,30 @@ export const createGuestOrder = async (
     return createdOrder;
   });
 
+  let payment = null;
+
+  if (paymentMethod === "paystack") {
+    const email =
+      customerEmail?.trim() ||
+      `guest-${customerPhone.replace(/\D/g, "")}@vendorville.com`;
+
+    const transaction = await paystackApi.initializeTransaction({
+      email,
+      amount: newOrder.totalAmount,
+      reference: paystackReference,
+      metadata: {
+        orderId: newOrder.id,
+        orderNumber: newOrder.orderNumber,
+        businessId: business.id,
+        businessSlug: business.slug,
+      },
+    });
+
+    payment = {
+      accessCode: transaction.access_code,
+      reference: transaction.reference,
+    };
+  }
   const vendorResult = await db
     .select()
     .from(users)
@@ -210,7 +235,11 @@ export const createGuestOrder = async (
     ...newOrder,
     totalAmount: newOrder.totalAmount / 100,
     deliveryFee: newOrder.deliveryFee / 100,
-    items: resolvedItems.map((i) => ({ ...i, unitPrice: i.unitPrice / 100 })),
+    items: resolvedItems.map((i) => ({
+      ...i,
+      unitPrice: i.unitPrice / 100,
+    })),
+    payment,
   };
 };
 
