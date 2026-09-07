@@ -16,9 +16,6 @@ const TRIAL_MS = TRIAL_DAYS * 24 * 60 * 60 * 1000;
 const SUBSCRIPTION_DAYS = 30;
 const SUBSCRIPTION_MS = SUBSCRIPTION_DAYS * 24 * 60 * 60 * 1000;
 
-
-
-
 export const getSubscription = async (userId) => {
   const result = await db
     .select()

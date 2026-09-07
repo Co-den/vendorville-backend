@@ -99,6 +99,13 @@
       "when": 1788130004297,
       "tag": "0013_short_ares",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1788820577441,
+      "tag": "0014_crazy_hitman",
+      "breakpoints": true
     }
   ]
 }

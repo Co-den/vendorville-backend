@@ -1,5 +1,6 @@
 import logger from "#config/logger.js";
 import { apiLimiter } from "#middlewares/rateLimiters.js";
+import analyticsRoutes from "#routes/analyticsRoute.js";
 import adminRoutes from "#routes/adminRoutes.js";
 import authRoutes from "#routes/authRoutes.js";
 import businessRoutes from "#routes/businessRoutes.js";
@@ -11,6 +12,7 @@ import riderTrackingRoutes from "#routes/riderTrackingRoutes.js";
 import staffAuthRoutes from "#routes/staffAuthRoutes.js";
 import storefrontRoutes from "#routes/storefrontRoutes.js";
 import subscriptionRoutes from "#routes/subscriptionRoutes.js";
+import transactionRoutes from "#routes/transactionRoute.js";
 import userRoutes from "#routes/userRoutes.js";
 import walletRoutes from "#routes/walletRoutes.js";
 import webhookRoutes from "#routes/webhookRoutes.js";
@@ -106,6 +108,7 @@ app.get("/health", (req, res) => {
 app.get("/api", (req, res) => {
   res.status(200).json({ message: "DevOps API! is running" });
 });
+
 // Rate limiting middleware for all API routes
 app.use("/api", apiLimiter);
 
@@ -123,7 +126,8 @@ app.use("/api/staff-auth", staffAuthRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/push", pushRoutes);
 app.use("/api/rider-track", riderTrackingRoutes);
-
+app.use("/api/analytics", analyticsRoutes);
+app.use("/api/businesses/:id/transactions", transactionRoutes);
 app.use("/nonexsistent", (req, res) => {
   res.status(404).json({ error: "Route not found" });
 });

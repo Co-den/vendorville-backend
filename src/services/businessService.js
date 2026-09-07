@@ -27,13 +27,11 @@ export const getUserBusinesses = async (userId) => {
 export const createBusiness = async (userId, data, files) => {
   const sub = await getSubscription(userId);
 
-  const canUseSubscription =
-  sub.status === "active" || sub.status === "trial";
+  const canUseSubscription = sub.status === "active" || sub.status === "trial";
 
-if (!canUseSubscription) {
-  throw new Error("SUBSCRIPTION_INACTIVE");
-}
-         
+  if (!canUseSubscription) {
+    throw new Error("SUBSCRIPTION_INACTIVE");
+  }
 
   const now = new Date();
   const isTrialActive =
@@ -44,7 +42,6 @@ if (!canUseSubscription) {
   if (!isSubscriptionActive && !isTrialActive) {
     throw new Error("SUBSCRIPTION_INACTIVE");
   }
-
 
   const existing = await db
     .select()
