@@ -31,6 +31,7 @@ const parseDateSafely = (dateStr) => {
   return date;
 };
 
+
 export const getOrdersByDateRange = async (
   userId,
   businessId,
@@ -47,12 +48,18 @@ export const getOrdersByDateRange = async (
     const start = parseDateSafely(startDate);
     const end = parseDateSafely(endDate);
 
-   
+    
     end.setHours(23, 59, 59, 999);
 
     if (start > end) {
       throw new Error("Start date must be before end date");
     }
+
+    // DEBUG LOGS
+    console.log("=== getOrdersByDateRange DEBUG ===");
+    console.log("Business ID:", businessId);
+    console.log("Start Date:", start.toISOString());
+    console.log("End Date:", end.toISOString());
 
     logger.info(
       `Fetching orders for business ${businessId} between ${start.toISOString()} and ${end.toISOString()}`
@@ -70,6 +77,9 @@ export const getOrdersByDateRange = async (
       )
       .orderBy(orders.createdAt);
 
+    console.log("Orders found:", orderList.length);
+    console.log("Sample order dates:", orderList.slice(0, 3).map(o => o.createdAt));
+
     logger.info(
       `Fetched ${orderList.length} orders for business ${businessId}`
     );
@@ -80,7 +90,6 @@ export const getOrdersByDateRange = async (
     throw error;
   }
 };
-
 export const getTransactionsByDateRange = async (
   userId,
   businessId,
