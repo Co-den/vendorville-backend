@@ -15,7 +15,6 @@ export const getStorefront = async (req, res) => {
 
 export const createOrder = async (req, res) => {
   try {
-    // If a customer is logged in (optional), req.customer is set by a soft auth middleware
     const customerAccountId = req.customer?.id || null;
     const order = await storefrontService.createGuestOrder(
       req.params.slug,

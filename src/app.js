@@ -126,8 +126,8 @@ app.use("/api/staff-auth", staffAuthRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/push", pushRoutes);
 app.use("/api/rider-track", riderTrackingRoutes);
-app.use("/api/analytics", analyticsRoutes);
-app.use("/api/businesses/:id/transactions", transactionRoutes);
+app.use("/api", analyticsRoutes);
+app.use("/api", transactionRoutes);
 app.use("/nonexsistent", (req, res) => {
   res.status(404).json({ error: "Route not found" });
 });

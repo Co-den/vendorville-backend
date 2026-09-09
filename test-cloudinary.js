@@ -20,7 +20,7 @@ const buffer = fs.readFileSync("./vv.png");
 
 cloudinary.uploader
   .upload_stream(
-    {}, // no folder parameter — bare minimum call
+    {},
     (error, result) => {
       if (error) console.error("UPLOAD FAILED:", error);
       else console.log("UPLOAD SUCCESS:", result.secure_url);
