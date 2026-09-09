@@ -47,7 +47,7 @@ export const getOrdersByDateRange = async (
     const start = parseDateSafely(startDate);
     const end = parseDateSafely(endDate);
 
-    // Adjust end date to include the entire day
+   
     end.setHours(23, 59, 59, 999);
 
     if (start > end) {
@@ -131,6 +131,7 @@ export const getTransactionsByDateRange = async (
   }
 };
 
+
 export const getOrderStatsByDateRange = async (
   userId,
   businessId,
@@ -164,6 +165,16 @@ export const getOrderStatsByDateRange = async (
         )
       );
 
+    const totalUnitsSold = orderList.reduce((sum, order) => {
+      if (order.items && Array.isArray(order.items)) {
+        return (
+          sum +
+          order.items.reduce((itemSum, item) => itemSum + (item.quantity || 0), 0)
+        );
+      }
+      return sum;
+    }, 0);
+
     const stats = {
       totalOrders: orderList.length,
       completedOrders: orderList.filter((o) => o.status === "completed").length,
@@ -175,6 +186,7 @@ export const getOrderStatsByDateRange = async (
           ? orderList.reduce((sum, o) => sum + (o.totalAmount || 0), 0) /
           orderList.length
           : 0,
+      totalUnitsSold,
     };
 
     logger.info(`Calculated order stats for business ${businessId}`);
