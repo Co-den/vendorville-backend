@@ -55,12 +55,6 @@ export const getOrdersByDateRange = async (
       throw new Error("Start date must be before end date");
     }
 
-    // DEBUG LOGS
-    console.log("=== getOrdersByDateRange DEBUG ===");
-    console.log("Business ID:", businessId);
-    console.log("Start Date:", start.toISOString());
-    console.log("End Date:", end.toISOString());
-
     logger.info(
       `Fetching orders for business ${businessId} between ${start.toISOString()} and ${end.toISOString()}`
     );
@@ -70,15 +64,18 @@ export const getOrdersByDateRange = async (
       .from(orders)
       .where(
         and(
-          eq(orders.businessId, businessId),
-          gte(orders.createdAt, start),
-          lte(orders.createdAt, end)
+          eq(orders.businessId, parseInt(businessId)),
+          sql`${orders.createdAt} >= ${start}`,
+          sql`${orders.createdAt} <= ${end}`
         )
       )
       .orderBy(orders.createdAt);
 
-    console.log("Orders found:", orderList.length);
-    console.log("Sample order dates:", orderList.slice(0, 3).map(o => o.createdAt));
+    
+    if (orderList.length > 0) {
+      logger.info("First order:", orderList[0].createdAt);
+      logger.info("Last order:", orderList[orderList.length - 1].createdAt);
+    }
 
     logger.info(
       `Fetched ${orderList.length} orders for business ${businessId}`
@@ -90,6 +87,8 @@ export const getOrdersByDateRange = async (
     throw error;
   }
 };
+
+
 export const getTransactionsByDateRange = async (
   userId,
   businessId,
@@ -106,7 +105,6 @@ export const getTransactionsByDateRange = async (
     const start = parseDateSafely(startDate);
     const end = parseDateSafely(endDate);
 
-    // Adjust end date to include the entire day
     end.setHours(23, 59, 59, 999);
 
     if (start > end) {
@@ -117,14 +115,15 @@ export const getTransactionsByDateRange = async (
       `Fetching transactions for business ${businessId} between ${start.toISOString()} and ${end.toISOString()}`
     );
 
+   
     const transactionList = await db
       .select()
       .from(transactions)
       .where(
         and(
-          eq(transactions.businessId, businessId),
-          gte(transactions.createdAt, start),
-          lte(transactions.createdAt, end)
+          eq(transactions.businessId, parseInt(businessId)),
+          sql`${transactions.createdAt} >= ${start}`,
+          sql`${transactions.createdAt} <= ${end}`
         )
       )
       .orderBy(transactions.createdAt);
