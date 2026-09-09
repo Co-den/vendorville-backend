@@ -1,3 +1,4 @@
+// services/analyticsService.js
 import { db } from "#config/database.js";
 import logger from "#config/logger.js";
 import { orders } from "#models/order.js";
@@ -19,7 +20,6 @@ const assertBusinessOwnership = async (userId, businessId) => {
   return business[0];
 };
 
-// Helper to parse dates safely
 const parseDateSafely = (dateStr) => {
   if (!dateStr) return null;
 
@@ -30,7 +30,6 @@ const parseDateSafely = (dateStr) => {
 
   return date;
 };
-
 
 export const getOrdersByDateRange = async (
   userId,
@@ -48,12 +47,17 @@ export const getOrdersByDateRange = async (
     const start = parseDateSafely(startDate);
     const end = parseDateSafely(endDate);
 
-    
+    // Adjust end date to include the entire day
     end.setHours(23, 59, 59, 999);
 
     if (start > end) {
       throw new Error("Start date must be before end date");
     }
+
+    console.log("=== getOrdersByDateRange ===");
+    console.log("Business ID:", businessId);
+    console.log("Start Date:", start.toISOString());
+    console.log("End Date:", end.toISOString());
 
     logger.info(
       `Fetching orders for business ${businessId} between ${start.toISOString()} and ${end.toISOString()}`
@@ -65,17 +69,13 @@ export const getOrdersByDateRange = async (
       .where(
         and(
           eq(orders.businessId, parseInt(businessId)),
-          sql`${orders.createdAt} >= ${start}`,
-          sql`${orders.createdAt} <= ${end}`
+          gte(orders.createdAt, start),
+          lte(orders.createdAt, end)
         )
       )
       .orderBy(orders.createdAt);
 
-    
-    if (orderList.length > 0) {
-      logger.info("First order:", orderList[0].createdAt);
-      logger.info("Last order:", orderList[orderList.length - 1].createdAt);
-    }
+    console.log("Orders found:", orderList.length);
 
     logger.info(
       `Fetched ${orderList.length} orders for business ${businessId}`
@@ -87,7 +87,6 @@ export const getOrdersByDateRange = async (
     throw error;
   }
 };
-
 
 export const getTransactionsByDateRange = async (
   userId,
@@ -111,22 +110,28 @@ export const getTransactionsByDateRange = async (
       throw new Error("Start date must be before end date");
     }
 
+    console.log("=== getTransactionsByDateRange ===");
+    console.log("Business ID:", businessId);
+    console.log("Start Date:", start.toISOString());
+    console.log("End Date:", end.toISOString());
+
     logger.info(
       `Fetching transactions for business ${businessId} between ${start.toISOString()} and ${end.toISOString()}`
     );
 
-   
     const transactionList = await db
       .select()
       .from(transactions)
       .where(
         and(
           eq(transactions.businessId, parseInt(businessId)),
-          sql`${transactions.createdAt} >= ${start}`,
-          sql`${transactions.createdAt} <= ${end}`
+          gte(transactions.createdAt, start),
+          lte(transactions.createdAt, end)
         )
       )
       .orderBy(transactions.createdAt);
+
+    console.log("Transactions found:", transactionList.length);
 
     logger.info(
       `Fetched ${transactionList.length} transactions for business ${businessId}`
@@ -138,7 +143,6 @@ export const getTransactionsByDateRange = async (
     throw error;
   }
 };
-
 
 export const getOrderStatsByDateRange = async (
   userId,
@@ -167,7 +171,7 @@ export const getOrderStatsByDateRange = async (
       .from(orders)
       .where(
         and(
-          eq(orders.businessId, businessId),
+          eq(orders.businessId, parseInt(businessId)),
           gte(orders.createdAt, start),
           lte(orders.createdAt, end)
         )
@@ -233,7 +237,7 @@ export const getTransactionStatsByDateRange = async (
       .from(transactions)
       .where(
         and(
-          eq(transactions.businessId, businessId),
+          eq(transactions.businessId, parseInt(businessId)),
           gte(transactions.createdAt, start),
           lte(transactions.createdAt, end)
         )
