@@ -116,15 +116,25 @@ export const generateVirtualDedicatedAccount = async (userId) => {
 
 export const getTransactions = async (userId) => {
   try {
+    const wallet = await db
+      .select()
+      .from(wallets)
+      .where(eq(wallets.userId, userId))
+      .limit(1);
+
+    if (wallet.length === 0) {
+      throw new Error("Wallet not found");
+    }
+
     const txns = await db
       .select()
       .from(walletTransactions)
-      .where(eq(walletTransactions.userId, userId))
+      .where(eq(walletTransactions.walletId, wallet[0].id))
       .orderBy(walletTransactions.createdAt);
 
     return txns.map((t) => ({
       id: t.id,
-      type: t.type, // withdrawal, deposit, refund
+      type: t.type,
       amount: t.amount,
       status: t.status,
       reference: t.reference,
