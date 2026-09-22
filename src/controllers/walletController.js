@@ -10,15 +10,27 @@ export const getWallet = async (req, res, next) => {
   }
 };
 
+
 export const generateAccount = async (req, res, next) => {
   try {
+    console.log("Generate account request - User ID:", req.user?.id);
+
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: "User not authenticated" });
+    }
+
     const result = await walletService.generateVirtualDedicatedAccount(req.user.id);
     res.status(200).json(result);
   } catch (error) {
-    logger.error("Generate account error", error);
-    res
-      .status(500)
-      .json({ message: error.message || "Failed to generate account" });
+    logger.error("Generate account error:", {
+      message: error.message,
+      stack: error.stack,
+      userID: req.user?.id,
+    });
+    res.status(500).json({
+      message: error.message || "Failed to generate account",
+      error: process.env.NODE_ENV === "development" ? error.stack : undefined,
+    });
   }
 };
 

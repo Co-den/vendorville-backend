@@ -51,66 +51,93 @@ export const getWalletDetails = async (userId) => {
   };
 };
 
+// services/walletService.js - Update generateVirtualDedicatedAccount
+
 export const generateVirtualDedicatedAccount = async (userId) => {
-  const userResult = await db
-    .select()
-    .from(users)
-    .where(eq(users.id, userId))
-    .limit(1);
-
-  if (userResult.length === 0) throw new Error("User not found");
-  const user = userResult[0];
-
-  const wallet = await getOrCreateWallet(userId);
-
-  let customerId = wallet.flutterwaveCustomerId;
-
-  // Create or get customer
-  if (!customerId) {
-    try {
-      const customer = await flutterwaveApi.createCustomer({
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        phone: user.phoneNumber,
-      });
-      customerId = customer.id;
-    } catch (error) {
-      logger.error("Failed to create Flutterwave customer:", error);
-      throw new Error("Failed to create customer account");
-    }
-  }
-
-  // Create virtual account
   try {
-    const dva = await flutterwaveApi.createDedicatedAccount(customerId);
+    console.log("Starting DVA generation for user:", userId);
 
-    const [updated] = await db
-      .update(wallets)
-      .set({
-        flutterwaveCustomerId: customerId,
-        dvaAccountNumber: dva.account_number,
-        dvaBankName: dva.bank_name,
-        dvaAccountName: dva.account_name,
-        dvaId: String(dva.id),
-        updatedAt: new Date(),
-      })
-      .where(eq(wallets.userId, userId))
-      .returning();
+    if (!userId) {
+      throw new Error("User ID is required");
+    }
 
-    logger.info(
-      `Virtual account created for user ${userId}: ${dva.account_number}`
-    );
+    const userResult = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
 
-    return {
-      accountNumber: updated.dvaAccountNumber,
-      bankName: updated.dvaBankName,
-      accountName: updated.dvaAccountName,
-      message: "Virtual account created successfully",
-    };
+    if (userResult.length === 0) {
+      throw new Error("User not found");
+    }
+
+    const user = userResult[0];
+    console.log("User found:", user.email);
+
+    const wallet = await getOrCreateWallet(userId);
+    console.log("Wallet ready:", wallet.id);
+
+    let customerId = wallet.flutterwaveCustomerId;
+
+    // Create customer if doesn't exist
+    if (!customerId) {
+      console.log("Creating Flutterwave customer...");
+
+      if (!process.env.FLUTTERWAVE_SECRET_KEY) {
+        throw new Error("FLUTTERWAVE_SECRET_KEY not configured");
+      }
+
+      try {
+        const customer = await flutterwaveApi.createCustomer({
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          phone: user.phoneNumber,
+        });
+        customerId = customer.id;
+        console.log("Customer created:", customerId);
+      } catch (error) {
+        logger.error("Flutterwave customer creation failed:", error.response?.data || error.message);
+        throw new Error(`Failed to create customer: ${error.response?.data?.message || error.message}`);
+      }
+    }
+
+    // Create virtual account
+    console.log("Creating virtual account...");
+    try {
+      const dva = await flutterwaveApi.createDedicatedAccount(customerId);
+      console.log("Virtual account created:", dva.account_number);
+
+      const [updated] = await db
+        .update(wallets)
+        .set({
+          flutterwaveCustomerId: customerId,
+          dvaAccountNumber: dva.account_number,
+          dvaBankName: dva.bank_name,
+          dvaAccountName: dva.account_name,
+          dvaId: String(dva.id),
+          updatedAt: new Date(),
+        })
+        .where(eq(wallets.userId, userId))
+        .returning();
+
+      logger.info(
+        `Virtual account created for user ${userId}: ${dva.account_number}`
+      );
+
+      return {
+        accountNumber: updated.dvaAccountNumber,
+        bankName: updated.dvaBankName,
+        accountName: updated.dvaAccountName,
+        message: "Virtual account created successfully",
+      };
+    } catch (error) {
+      logger.error("Flutterwave DVA creation failed:", error.response?.data || error.message);
+      throw new Error(`Failed to create virtual account: ${error.response?.data?.message || error.message}`);
+    }
   } catch (error) {
-    logger.error("Failed to create virtual account:", error);
-    throw new Error("Failed to create virtual account");
+    logger.error("Generate account error:", error);
+    throw error;
   }
 };
 
