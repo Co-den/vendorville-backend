@@ -51,7 +51,6 @@ export const getWalletDetails = async (userId) => {
   };
 };
 
-// services/walletService.js - Update generateVirtualDedicatedAccount
 
 export const generateVirtualDedicatedAccount = async (userId) => {
   try {
@@ -72,69 +71,64 @@ export const generateVirtualDedicatedAccount = async (userId) => {
     }
 
     const user = userResult[0];
+
     console.log("User found:", user.email);
 
     const wallet = await getOrCreateWallet(userId);
+
     console.log("Wallet ready:", wallet.id);
 
-    let customerId = wallet.flutterwaveCustomerId;
-
-    // Create customer if doesn't exist
-    if (!customerId) {
-      console.log("Creating Flutterwave customer...");
-
-      if (!process.env.FLUTTERWAVE_SECRET_KEY) {
-        throw new Error("FLUTTERWAVE_SECRET_KEY not configured");
-      }
-
-      try {
-        const customer = await flutterwaveApi.createCustomer({
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          phone: user.phoneNumber,
-        });
-        customerId = customer.id;
-        console.log("Customer created:", customerId);
-      } catch (error) {
-        logger.error("Flutterwave customer creation failed:", error.response?.data || error.message);
-        throw new Error(`Failed to create customer: ${error.response?.data?.message || error.message}`);
-      }
-    }
-
-    // Create virtual account
-    console.log("Creating virtual account...");
-    try {
-      const dva = await flutterwaveApi.createDedicatedAccount(customerId);
-      console.log("Virtual account created:", dva.account_number);
-
-      const [updated] = await db
-        .update(wallets)
-        .set({
-          flutterwaveCustomerId: customerId,
-          dvaAccountNumber: dva.account_number,
-          dvaBankName: dva.bank_name,
-          dvaAccountName: dva.account_name,
-          dvaId: String(dva.id),
-          updatedAt: new Date(),
-        })
-        .where(eq(wallets.userId, userId))
-        .returning();
-
-      logger.info(
-        `Virtual account created for user ${userId}: ${dva.account_number}`
-      );
-
+  
+    if (wallet.dvaAccountNumber) {
       return {
-        accountNumber: updated.dvaAccountNumber,
-        bankName: updated.dvaBankName,
-        accountName: updated.dvaAccountName,
-        message: "Virtual account created successfully",
+        accountNumber: wallet.dvaAccountNumber,
+        bankName: wallet.dvaBankName,
+        accountName: wallet.dvaAccountName,
+        message: "Virtual account already exists",
       };
-    } catch (error) {
-      logger.error("Flutterwave DVA creation failed:", error.response?.data || error.message);
-      throw new Error(`Failed to create virtual account: ${error.response?.data?.message || error.message}`);
     }
+
+    const txRef = `VV-WALLET-${userId}-${Date.now()}`;
+
+    console.log("Creating Flutterwave virtual account...");
+
+    const dva = await flutterwaveApi.createDedicatedAccount({
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      phone: user.phoneNumber,
+      bvn: user.bvn,
+      nin: user.nin,
+      txRef,
+    });
+
+    console.log(
+      "Virtual account created:",
+      dva.account_number
+    );
+
+    const [updated] = await db
+      .update(wallets)
+      .set({
+        dvaAccountNumber: dva.account_number,
+        dvaBankName: dva.bank_name,
+        dvaAccountName: dva.account_name,
+        dvaId: String(dva.id || dva.order_ref || dva.flw_ref),
+        updatedAt: new Date(),
+      })
+      .where(eq(wallets.userId, userId))
+      .returning();
+
+    logger.info(
+      `Virtual account created for user ${userId}: ${dva.account_number}`
+    );
+
+    return {
+      accountNumber: updated.dvaAccountNumber,
+      bankName: updated.dvaBankName,
+      accountName: updated.dvaAccountName,
+      message: "Virtual account created successfully",
+    };
   } catch (error) {
     logger.error("Generate account error:", error);
     throw error;
@@ -475,6 +469,7 @@ export const creditWalletFromWebhook = async ({
   description,
 }) => {
   try {
+    // 1. Find wallet by virtual account
     const wallet = await db
       .select()
       .from(wallets)
@@ -487,9 +482,32 @@ export const creditWalletFromWebhook = async ({
     }
 
     const walletData = wallet[0];
+
+    // 2. Idempotency check
+    // Prevent the same Flutterwave transaction from
+    // crediting the wallet more than once.
+    const existingTransaction = await db
+      .select()
+      .from(walletTransactions)
+      .where(eq(walletTransactions.reference, reference))
+      .limit(1);
+
+    if (existingTransaction.length > 0) {
+      logger.info(
+        `Duplicate webhook ignored. Reference already processed: ${reference}`
+      );
+
+      return {
+        alreadyProcessed: true,
+        wallet: walletData,
+        transaction: existingTransaction[0],
+      };
+    }
+
+    // 3. Convert Kobo → Naira
     const amountNaira = amountKobo / 100;
 
-    // Update wallet balance
+    // 4. Credit wallet
     const [updated] = await db
       .update(wallets)
       .set({
@@ -499,23 +517,30 @@ export const creditWalletFromWebhook = async ({
       .where(eq(wallets.id, walletData.id))
       .returning();
 
-    // Record transaction
-    await db.insert(WalletTransactions).values({
-      userId: walletData.userId,
-      type: "deposit",
-      amount: amountNaira,
-      status: "completed",
-      reference,
-      description,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
+    // 5. Record transaction
+    const [transaction] = await db
+      .insert(walletTransactions)
+      .values({
+        userId: walletData.userId,
+        type: "deposit",
+        amount: amountNaira,
+        status: "completed",
+        reference,
+        description,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
 
     logger.info(
       `Wallet credited for user ${walletData.userId}: ₦${amountNaira} (Ref: ${reference})`
     );
 
-    return updated;
+    return {
+      alreadyProcessed: false,
+      wallet: updated,
+      transaction,
+    };
   } catch (error) {
     logger.error("Failed to credit wallet from webhook:", error);
     throw error;

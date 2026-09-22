@@ -30,20 +30,40 @@ export const flutterwaveApi = {
     }
   },
 
-  // Create dedicated account 
-  createDedicatedAccount: async (customerId) => {
+ 
+  createDedicatedAccount: async ({
+    email,
+    firstName,
+    lastName,
+    phone,
+    bvn,
+    nin,
+    txRef,
+  }) => {
     try {
       const { data } = await flutterwave.post("/virtual-account-numbers", {
-        customer_id: customerId,
+        email,
+        firstname: firstName,
+        lastname: lastName,
+        phonenumber: phone,
         is_permanent: true,
+        tx_ref: txRef,
+        currency: "NGN",
+        bvn,
+        nin,
       });
+
       return data.data;
     } catch (error) {
       logger.error(
         "Flutterwave createDedicatedAccount error",
         error.response?.data || error.message
       );
-      throw new Error("Failed to create dedicated account");
+
+      throw new Error(
+        error.response?.data?.message ||
+        "Failed to create dedicated account"
+      );
     }
   },
 
