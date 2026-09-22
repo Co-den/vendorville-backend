@@ -157,7 +157,6 @@ export const createOrder = async (userId, businessId, data) => {
     return createdOrder;
   });
 
-  // Everything below runs AFTER the transaction has committed successfully
 
   const bizResult = await db
     .select()
@@ -265,8 +264,7 @@ export const updateOrderStatus = async (
       .where(eq(orders.id, orderId));
   }
 
-  // Restocking can push a product back above its low-stock threshold —
-  // re-check so the alert flag resets correctly for future dips.
+  
   for (const productId of restockedProductIds) {
     checkAndNotifyLowStock(productId).catch((err) =>
       logger.error("Low stock check error", err),
@@ -376,7 +374,7 @@ export const confirmOrder = async (userId, businessId, orderId) => {
   return { message: "Order confirmed" };
 };
 
-// Notification bell feed pending orders needing confirmation + low stock alerts
+
 export const getVendorNotifications = async (userId, businessId) => {
   await assertBusinessOwnership(userId, businessId);
 

@@ -41,7 +41,7 @@ export const signup = async (req, res, next) => {
       role,
     } = validationResult.data;
 
-    //AUTH SERVICE
+    
     const user = await createUser({
       firstName,
       lastName,

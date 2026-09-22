@@ -12,7 +12,7 @@ export const getWallet = async (req, res, next) => {
 
 export const generateAccount = async (req, res, next) => {
   try {
-    const result = await walletService.generateDedicatedAccount(req.user.id);
+    const result = await walletService.generateVirtualDedicatedAccount(req.user.id);
     res.status(200).json(result);
   } catch (error) {
     logger.error("Generate account error", error);

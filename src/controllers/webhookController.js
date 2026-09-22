@@ -32,5 +32,5 @@ export const paystackWebhook = async (req, res) => {
     }
   }
 
-  res.sendStatus(200); // always acknowledge receipt quickly
+  res.sendStatus(200); 
 };

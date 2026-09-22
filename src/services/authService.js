@@ -32,7 +32,7 @@ export const createUser = async ({
   city,
   businessAddress,
   postalCode,
-  pin,
+  pin, 
   role = "user",
 }) => {
   try {
