@@ -16,6 +16,7 @@ import transactionRoutes from "#routes/transactionRoute.js";
 import userRoutes from "#routes/userRoutes.js";
 import walletRoutes from "#routes/walletRoutes.js";
 import webhookRoutes from "#routes/webhookRoutes.js";
+import kycRoutes from "#routes/kycRoutes.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
@@ -128,6 +129,7 @@ app.use("/api/push", pushRoutes);
 app.use("/api/rider-track", riderTrackingRoutes);
 app.use("/api", analyticsRoutes);
 app.use("/api", transactionRoutes);
+app.use("/api/kyc", kycRoutes);
 app.use("/nonexsistent", (req, res) => {
   res.status(404).json({ error: "Route not found" });
 });

@@ -60,12 +60,24 @@ export const users = pgTable("users", {
   }).notNull(),
 
   isVerified: boolean("is_verified").default(false).notNull(),
+  identityType: varchar("identity_type", {
+    length: 20,
+  }),
+
+  identityNumber: varchar("identity_number", {
+    length: 20,
+  }),
+
+  identityVerified: boolean("identity_verified")
+    .default(false)
+    .notNull(),
 
   verificationCode: varchar("verification_code", { length: 10 }),
 
   verificationCodeExpiresAt: timestamp("verification_code_expires_at"),
 
   resetPasswordToken: varchar("reset_password_token", { length: 255 }),
+  
   resetPasswordExpires: timestamp("reset_password_expires"),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
